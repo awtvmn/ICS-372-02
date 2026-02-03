@@ -1,4 +1,5 @@
 package edu.metrostate;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -23,6 +24,20 @@ public class Main {
 
             long order_date = (long)order.get("order_date");
             System.out.println("order date is  " + order_date);
+
+            // the following parses from json requested items, quantity,and item price of each order
+            JSONArray items = (JSONArray) order.get("items");
+            for (Object obj : items){
+                JSONObject item = (JSONObject) obj;
+                String name = (String) item.get("name");
+                long quantity = (long) item.get("quantity");
+                double price = (double) item.get("price");
+
+                System.out.println("item  " + name);
+                System.out.println("quantity  " + quantity);
+                System.out.println("price  " + price);
+
+            }
 
 
         } catch (IOException | ParseException e) {
