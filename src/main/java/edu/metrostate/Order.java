@@ -8,4 +8,12 @@ public abstract class Order {
         this.orderID = orderID;
         this.orderDate = orderDate;;
     }
+
+    public int getOrderID(){
+        return orderID;
+    }
+
+    public long getOrderDate(){
+        return orderDate;
+    }
 }
