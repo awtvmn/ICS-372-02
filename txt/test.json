@@ -1,0 +1,23 @@
+{
+  "order": {
+    "type": "ship",
+    "order_date": 1515354694451,
+    "items": [
+      {
+        "name":"Sofa",
+        "quantity": 1,
+        "price": 210.99
+      },
+      {
+        "name":"Desk",
+        "quantity": 2,
+        "price": 13.99
+      },
+      {
+        "name":"Rug",
+        "quantity": 1,
+        "price": 48.95
+      }
+    ]
+  }
+}
