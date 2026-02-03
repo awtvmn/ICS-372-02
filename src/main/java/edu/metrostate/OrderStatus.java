@@ -4,6 +4,4 @@ public enum OrderStatus {
     INCOMING,
     IN_PROGRESS,
     COMPLETED,
-
-
 }
