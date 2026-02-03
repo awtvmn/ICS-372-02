@@ -21,7 +21,7 @@ public class Main {
             String type = (String)order.get("type");
             System.out.println("type is " + type);
 
-            String order_date = (String)order.get("order_date");
+            long order_date = (long)order.get("order_date");
             System.out.println("order date is  " + order_date);
 
 
