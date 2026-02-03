@@ -2,6 +2,7 @@ package edu.metrostate;
 
 import org.json.simple.JSONObject;
 
+import java.io.PrintStream;
 import java.util.ArrayList;
 
 public abstract class Order {
@@ -41,6 +42,16 @@ public abstract class Order {
             return true;
         }
         return false;
+     }
+
+     public void displayorder() {
+        System.out.println("Order ID: " + orderID);
+        System.out.println("Date: " + orderDate);
+        System.out.println("Status: " + status);
+        System.out.println("Items: ");
+        for (Item item : items) {
+            System.out.printf("%s (Qty: %d, Price: $%.2f)\n", item.getName(), item.getQuantity(), item.getPrice());
+        }
      }
 
      public void add(Item item){
