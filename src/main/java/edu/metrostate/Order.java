@@ -9,13 +9,15 @@ public abstract class Order {
     protected int orderID;
     protected long orderDate;
     protected OrderStatus status;
-    ArrayList<Item> items;
+    protected ArrayList<Item> items;
+    protected String type;
 
-    public Order(int orderID, long orderDate, ArrayList<Item> items) {
+    public Order(int orderID, long orderDate, ArrayList<Item> items, String type) {
         this.orderID = orderID;
         this.orderDate = orderDate;
         this.status = OrderStatus.INCOMING;
         this.items = new ArrayList<>();
+        this.type = type;
     }
 
     //getters
@@ -28,6 +30,8 @@ public abstract class Order {
     public OrderStatus getOrderStatus() {
         return status;
     }
+    public String getType() {return type; }
+
 
     public boolean startFulfilling() {
         if (status == OrderStatus.INCOMING){
@@ -44,14 +48,24 @@ public abstract class Order {
         return false;
      }
 
+     public double getTotalPrice() {
+        double total = 0;
+        for (Item item : items) {
+            total += item.getPrice() * item.getQuantity();
+        }
+        return total;
+     }
+
      public void displayorder() {
         System.out.println("Order ID: " + orderID);
+        System.out.println("Type: "  + type);
         System.out.println("Date: " + orderDate);
         System.out.println("Status: " + status);
         System.out.println("Items: ");
         for (Item item : items) {
             System.out.printf("%s (Qty: %d, Price: $%.2f)\n", item.getName(), item.getQuantity(), item.getPrice());
         }
+        System.out.printf("Total  Price: $%.2f\n", getTotalPrice());
      }
 
      public void add(Item item){
