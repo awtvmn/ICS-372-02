@@ -14,6 +14,7 @@ import java.util.Scanner;
 // click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
 public class Main {
     public static void main(String[] args) {
+        OrderManager manager = new OrderManager();
         //FileReader fr = new FileReader(order.json);
         JSONParser parser = new JSONParser();
         Scanner s = new Scanner(System.in);
@@ -76,19 +77,22 @@ public class Main {
 
             } else if (choice == 2) {
                 System.out.print("Enter order ID: ");
-                int orderID = s.nextInt(); //WORKING ON IT
+                int orderID = s.nextInt();
+                manager.startOrder(orderID);
 
             } else if (choice == 3) {
                 System.out.print("Enter order ID: ");
-                int orderID = s.nextInt(); //WORKING ON IT
+                int orderID = s.nextInt();
+                manager.displayOrder(orderID);
 
             } else if (choice == 4) {
                 System.out.print("Enter order ID: ");
-                int orderID = s.nextInt(); //WORKING ON IT
+                int orderID = s.nextInt();
+                manager.completeOrder(orderID);
 
-            } else if (choice == 5) {
+            } else if (choice == 5) { //incomplete
 
-            } else if (choice == 6) {
+            } else if (choice == 6) { //incomplete
 
             } else if (choice == 7) {
                 System.out.println("Goodbye");
