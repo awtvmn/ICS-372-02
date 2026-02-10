@@ -43,7 +43,7 @@ public class OrderManager {
         if (order.startFulfilling()){
             System.out.println("Order " + orderID + " has started.");
         } else {
-            System.out.println("Order " + orderID + " cannot start because " + order.getOrderStatus());
+            System.out.println("Order " + orderID + " cannot start. Status: " + order.getOrderStatus());
         }
 
     }
@@ -68,7 +68,7 @@ public class OrderManager {
         if (order.completeOrder()){
             System.out.println("Order " + orderID + " has been completed.");
         } else {
-            System.out.println("Order " + orderID + " cannot start because " + order.getOrderStatus());
+            System.out.println("Order " + orderID + " cannot start. Status: " + order.getOrderStatus());
         }
 
     }
@@ -97,6 +97,7 @@ public class OrderManager {
 
     // Requirement 7
     public void exportOrders() {
+
 
     }
 
