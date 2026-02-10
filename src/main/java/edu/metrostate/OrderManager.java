@@ -74,7 +74,25 @@ public class OrderManager {
     }
     // Requirement 8
     public void incompleteOrder(){
+        boolean hasUncompletedOrders = false;
+        System.out.println("Uncompleted Orders: ");
+        System.out.println();
 
+        for(Order order : allOrders.values()){
+            if(order.getOrderStatus() != OrderStatus.COMPLETED){
+                System.out.println("Order ID: " + order.getOrderID());
+                System.out.println("Order Date: " + order.getOrderDate());
+                System.out.println("Order Type: " + order.getType());
+                System.out.println("Order Status: " + order.getOrderStatus());
+                System.out.printf("Total Price: $%.2f%n", order.getTotalPrice());
+                System.out.println();
+                hasUncompletedOrders = true;
+            }
+        }
+
+        if(!hasUncompletedOrders){
+            System.out.println("No uncompleted orders.");
+        }
     }
 
     // Requirement 7
