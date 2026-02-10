@@ -6,6 +6,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.ArrayList;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 public class OrderManager {
     private HashMap<Integer, Order> allOrders = new HashMap<>();
@@ -118,9 +120,12 @@ public class OrderManager {
             ordersArray.add(orderJson);
         }
         root.put("orders", ordersArray);
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        String prettyJson = gson.toJson(root);
 
         try (FileWriter writer = new FileWriter("all-orders.json")) {
-            writer.write(root.toJSONString());
+            //writer.write(root.toJSONString());
+            writer.write(prettyJson);
             System.out.println("All orders exported successfully.");
         } catch (IOException e) {
             e.printStackTrace();
