@@ -42,6 +42,7 @@ public class Main {
                     //checkin
                     if (!file.exists()) {
                         System.out.println("File does not exist");
+                        continue;
                     }
 
                     JSONObject js = (JSONObject) parser.parse(new FileReader(filename));
