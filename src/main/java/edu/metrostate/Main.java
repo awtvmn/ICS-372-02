@@ -93,9 +93,11 @@ public class Main {
                 int orderID = s.nextInt();
                 manager.completeOrder(orderID);
 
-            } else if (choice == 5) { //incomplete
+            } else if (choice == 5) {
+                manager.incompleteOrder();
 
-            } else if (choice == 6) { //incomplete
+            } else if (choice == 6) {
+                manager.exportOrders();
 
             } else if (choice == 7) {
                 System.out.println("Goodbye");

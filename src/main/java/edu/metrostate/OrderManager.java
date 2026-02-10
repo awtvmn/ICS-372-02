@@ -72,9 +72,15 @@ public class OrderManager {
         }
 
     }
+    // Requirement 8
+    public void incompleteOrder(){
 
-    // show uncompleted orders
-    // export all orders
+    }
+
+    // Requirement 7
+    public void exportOrders() {
+
+    }
 
 
 
