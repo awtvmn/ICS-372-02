@@ -107,6 +107,9 @@ public class OrderManager {
             orderJson.put("type",order.getType());
             orderJson.put("order_date",order.getOrderDate());
             orderJson.put("status",order.getOrderStatus());
+            if (!order.getOrderStatus().toString().equals("COMPLETED")){
+                orderJson.put("price total ",order.getTotalPrice());
+            }
 
             JSONArray itemsArray = new JSONArray();
             for (Item item : order.getItems()){
