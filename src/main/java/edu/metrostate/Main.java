@@ -29,8 +29,15 @@ public class Main {
             System.out.println("7. Exit");
             System.out.print("Enter choice: ");
 
-            int choice = s.nextInt();
-            s.nextLine();
+            String input = s.nextLine();
+            int choice;
+            try {
+                choice = Integer.parseInt(input);
+            } catch (NumberFormatException e){
+                System.out.println("Invalid choice.");
+                continue;
+            }
+
             if (choice == 1) {
                 // Requirement 1: Read JSON file
                 try {
