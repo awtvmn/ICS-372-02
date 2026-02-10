@@ -21,13 +21,13 @@ public class OrderManager {
         } else if (type.equals("pickup")) {
             newOrder = new PickupOrder(nextOrderID, orderDate, items);
         } else {
-            System.out.println("Unknown order type");
+            System.out.println("Unknown order type.");
             return -1;
         }
 
         // Assigns new order to an ID
         allOrders.put(nextOrderID, newOrder); //puts it in the hash
-        System.out.println("Order " + nextOrderID + " add successfully.");
+        System.out.println("Order " + nextOrderID + " added successfully.");
         nextOrderID++; // increm by 1
 
         return 0;

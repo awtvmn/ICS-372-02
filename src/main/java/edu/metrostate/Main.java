@@ -71,6 +71,9 @@ public class Main {
 
                     }
 
+                    // adds order to ordermanager
+                    manager.addOrder(type, order_date, items);
+
                 } catch (IOException | ParseException e) {
                     throw new RuntimeException(e);
                 }
