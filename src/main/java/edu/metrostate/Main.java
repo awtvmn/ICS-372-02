@@ -89,16 +89,19 @@ public class Main {
             } else if (choice == 2) {
                 System.out.print("Enter order ID: ");
                 int orderID = s.nextInt();
+                s.nextLine();
                 manager.startOrder(orderID);
 
             } else if (choice == 3) {
                 System.out.print("Enter order ID: ");
                 int orderID = s.nextInt();
+                s.nextLine();
                 manager.displayOrder(orderID);
 
             } else if (choice == 4) {
                 System.out.print("Enter order ID: ");
                 int orderID = s.nextInt();
+                s.nextLine();
                 manager.completeOrder(orderID);
 
             } else if (choice == 5) {
