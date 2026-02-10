@@ -49,10 +49,10 @@ public class Main {
                     //The software shall read and store the order type
                     JSONObject order = (JSONObject) js.get("order");
                     String type = (String) order.get("type");
-                    System.out.println("type is " + type);
+                    System.out.println("Type is " + type);
 
                     long order_date = (long) order.get("order_date");
-                    System.out.println("order date is  " + order_date);
+                    System.out.println("Order date is " + order_date);
 
                     // the following parses from JSON requested items, quantity,and item price of each order
                     ArrayList<Item> items = new ArrayList<>();
@@ -65,9 +65,9 @@ public class Main {
 
                         items.add(new Item(name, price, (int) quantity));
 
-                        System.out.println("item  " + name);
-                        System.out.println("quantity  " + quantity);
-                        System.out.println("price  " + price);
+                        System.out.println("Item is " + name);
+                        System.out.println("Quantity is " + quantity);
+                        System.out.println("Price is $" + price);
 
                     }
 

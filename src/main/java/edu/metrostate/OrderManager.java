@@ -43,7 +43,7 @@ public class OrderManager {
         if (order.startFulfilling()){
             System.out.println("Order " + orderID + " has started.");
         } else {
-            System.out.println("Order " + orderID + " cannot start because " + order.getOrderStatus());
+            System.out.println("Order " + orderID + " cannot start. Status: " + order.getOrderStatus());
         }
 
     }
@@ -68,13 +68,31 @@ public class OrderManager {
         if (order.completeOrder()){
             System.out.println("Order " + orderID + " has been completed.");
         } else {
-            System.out.println("Order " + orderID + " cannot start because " + order.getOrderStatus());
+            System.out.println("Order " + orderID + " cannot start. Status: " + order.getOrderStatus());
         }
 
     }
     // Requirement 8
     public void incompleteOrder(){
+        boolean hasUncompletedOrders = false;
+        System.out.println("Uncompleted Orders: ");
+        System.out.println();
 
+        for(Order order : allOrders.values()){
+            if(order.getOrderStatus() != OrderStatus.COMPLETED){
+                System.out.println("Order ID: " + order.getOrderID());
+                System.out.println("Order Date: " + order.getOrderDate());
+                System.out.println("Order Type: " + order.getType());
+                System.out.println("Order Status: " + order.getOrderStatus());
+                System.out.printf("Total Price: $%.2f%n", order.getTotalPrice());
+                System.out.println();
+                hasUncompletedOrders = true;
+            }
+        }
+
+        if(!hasUncompletedOrders){
+            System.out.println("No uncompleted orders.");
+        }
     }
 
     // Requirement 7
@@ -107,6 +125,7 @@ public class OrderManager {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
 
 
     }

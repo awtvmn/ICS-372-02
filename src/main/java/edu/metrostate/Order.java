@@ -16,7 +16,7 @@ public abstract class Order {
         this.orderID = orderID;
         this.orderDate = orderDate;
         this.status = OrderStatus.INCOMING;
-        this.items = new ArrayList<>();
+        this.items = items;
         this.type = type;
     }
 
