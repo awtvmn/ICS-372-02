@@ -79,6 +79,35 @@ public class OrderManager {
 
     // Requirement 7
     public void exportOrders() {
+        JSONObject root = new JSONObject();
+        JSONArray ordersArray = new JSONArray();
+        for (Order order : allOrders.values()){
+            JSONObject orderJson = new JSONObject();
+            orderJson.put("order_id",order.getOrderID());
+            orderJson.put("type",order.getType());
+            orderJson.put("order_date",order.getOrderDate());
+            orderJson.put("status",order.getOrderStatus());
+
+            JSONArray itemsArray = new JSONArray();
+            for (Item item : order.getItems()){
+                JSONObject itemJson = new JSONObject();
+                itemJson.put("name",item.getName());
+                itemJson.put("Quantity",item.getQuantity());
+                itemJson.put("price",item.getPrice());
+                itemsArray.add(itemJson);
+            }
+            orderJson.put("items", itemsArray);
+            ordersArray.add(orderJson);
+        }
+        root.put("orders", ordersArray);
+
+        try (FileWriter writer = new FileWriter("all-orders.json")) {
+            writer.write(root.toJSONString());
+            System.out.println("All orders exported successfully.");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
 
     }
 

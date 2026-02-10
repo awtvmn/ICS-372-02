@@ -32,6 +32,9 @@ public abstract class Order {
     }
     public String getType() {return type; }
 
+    public ArrayList<Item> getItems() {
+        return items;
+    }
 
     public boolean startFulfilling() {
         if (status == OrderStatus.INCOMING){
