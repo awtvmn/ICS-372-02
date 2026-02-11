@@ -1,5 +1,8 @@
 package edu.metrostate;
 
+/**
+ * Item class, used to create different item objects
+ */
 public class Item {
     private String name;
     private double price;
