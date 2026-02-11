@@ -10,17 +10,24 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
-//TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
-// click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
+/**
+ * Main class, allows the user to go through different options from a menu
+ */
 public class Main {
+    /**
+     * Main method, holds the menu to give the user 7 different options on what to
+     * do with different orders
+     * @param args String[]
+     */
     public static void main(String[] args) {
         OrderManager manager = new OrderManager();
         //FileReader fr = new FileReader(order.json);
         JSONParser parser = new JSONParser();
         Scanner s = new Scanner(System.in);
+        String filename = "txt/"; //added to make entering filename easier
 
         while (true) {
-            System.out.println("1. Load order from file");
+            System.out.println("1. Add order from file");
             System.out.println("2. Start order");
             System.out.println("3. Display order");
             System.out.println("4. Complete order");
@@ -42,8 +49,8 @@ public class Main {
                 // Requirement 1: Read JSON file
                 try {
                     //asking for file name
-                    System.out.println("Enter order file (txt/(filename).json): ");
-                    String filename = s.nextLine();
+                    System.out.println("Enter order file (filename.json): ");
+                    filename += s.nextLine();
                     File file = new File(filename);
 
                     //checkin
@@ -53,7 +60,7 @@ public class Main {
                     }
 
                     JSONObject js = (JSONObject) parser.parse(new FileReader(filename));
-                    System.out.println(js);
+
                     //The software shall read and store the order type
                     JSONObject order = (JSONObject) js.get("order");
                     String type = (String) order.get("type");
@@ -79,8 +86,9 @@ public class Main {
 
                     }
 
-                    // adds order to ordermanager
+                    // adds order to orderManager
                     manager.addOrder(type, order_date, items);
+                    filename = "txt/"; //starts filename over in order to add more files
 
                 } catch (IOException | ParseException e) {
                     throw new RuntimeException(e);

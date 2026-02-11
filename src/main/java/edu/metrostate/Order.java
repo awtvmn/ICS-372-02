@@ -1,10 +1,10 @@
 package edu.metrostate;
 
-import org.json.simple.JSONObject;
-
-import java.io.PrintStream;
 import java.util.ArrayList;
 
+/**
+ * Order class, used to create different orders
+ */
 public abstract class Order {
     protected int orderID;
     protected long orderDate;
@@ -12,6 +12,7 @@ public abstract class Order {
     protected ArrayList<Item> items;
     protected String type;
 
+    //constructor
     public Order(int orderID, long orderDate, ArrayList<Item> items, String type) {
         this.orderID = orderID;
         this.orderDate = orderDate;
@@ -31,11 +32,14 @@ public abstract class Order {
         return status;
     }
     public String getType() {return type; }
-
     public ArrayList<Item> getItems() {
         return items;
     }
 
+    /**
+     * startFulfilling method, returns true if incoming orders need to be started
+     * @return boolean
+     */
     public boolean startFulfilling() {
         if (status == OrderStatus.INCOMING){
             status = OrderStatus.IN_PROGRESS;
@@ -43,23 +47,35 @@ public abstract class Order {
         }
         return false;
     }
-     public boolean completeOrder() {
+
+    /**
+     * completeOrder method, returns true if in progress orders can be completed
+     * @return boolean
+     */
+    public boolean completeOrder() {
         if (status == OrderStatus.IN_PROGRESS) {
             status = OrderStatus.COMPLETED;
             return true;
         }
         return false;
-     }
+    }
 
-     public double getTotalPrice() {
+    /**
+     * getTotalPrice method, gets the total price of all items
+     * @return double
+     */
+    public double getTotalPrice() {
         double total = 0;
         for (Item item : items) {
             total += item.getPrice() * item.getQuantity();
         }
         return total;
-     }
+    }
 
-     public void displayorder() {
+    /**
+     * displayOrder method, prints out an order's id, type, date, status, and items
+     */
+    public void displayOrder() {
         System.out.println("Order ID: " + orderID);
         System.out.println("Type: "  + type);
         System.out.println("Date: " + orderDate);
@@ -69,9 +85,13 @@ public abstract class Order {
             System.out.printf("%s (Qty: %d, Price: $%.2f)\n", item.getName(), item.getQuantity(), item.getPrice());
         }
         System.out.printf("Total  Price: $%.2f\n", getTotalPrice());
-     }
+    }
 
-     public void add(Item item){
+    /**
+     * add method, adds item objects into an array for an order
+     * @param item item
+     */
+    public void add(Item item){
         items.add(item);
      }
 }

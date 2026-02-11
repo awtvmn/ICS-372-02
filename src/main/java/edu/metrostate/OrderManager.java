@@ -9,6 +9,10 @@ import java.util.ArrayList;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+/**
+ * OrderManager class, used to add, start, display complete or incomplete orders,
+ * and export orders into a JSON file
+ */
 public class OrderManager {
     private HashMap<Integer, Order> allOrders = new HashMap<>();
     private static int nextOrderID = 1;
@@ -57,7 +61,7 @@ public class OrderManager {
             System.out.println("Order not found.");
             return;
         }
-        order.displayorder();
+        order.displayOrder();
     }
 
     // Requirement 4: completed order
