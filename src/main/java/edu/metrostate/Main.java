@@ -24,7 +24,6 @@ public class Main {
         //FileReader fr = new FileReader(order.json);
         JSONParser parser = new JSONParser();
         Scanner s = new Scanner(System.in);
-        String filename = "txt/"; //added to make entering filename easier
 
         while (true) {
             System.out.println("1. Add order from file");
@@ -50,7 +49,7 @@ public class Main {
                 try {
                     //asking for file name
                     System.out.println("Enter order file (filename.json): ");
-                    filename += s.nextLine();
+                    String filename = "txt/" + s.nextLine(); //makes it easier to type filename
                     File file = new File(filename);
 
                     //checkin
@@ -88,7 +87,6 @@ public class Main {
 
                     // adds order to orderManager
                     manager.addOrder(type, order_date, items);
-                    filename = "txt/"; //starts filename over in order to add more files
 
                 } catch (IOException | ParseException e) {
                     throw new RuntimeException(e);
