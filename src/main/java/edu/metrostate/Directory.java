@@ -113,59 +113,5 @@ public class Directory {
         }
     }
 
-    /**
-     * importXML - reads a XML order file and adds it to the OrderManager
-     */
-    private void importXML(File file) {
-        try {
-            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder builder = factory.newDocumentBuilder();
-            Document doc = builder.parse(file);
-            doc.getDocumentElement().normalize();
-
-            NodeList orderNodes = doc.getElementsByTagName("Order");
-
-            for (int i = 0; i < orderNodes.getLength(); i++) {
-                try {
-                    Element orderElement = (Element) orderNodes.item(i);
-
-                    String type = orderElement.getElementsByTagName("OrderType")
-                            .item(0).getTextContent().trim().toLowerCase();
-
-                    long orderDate = System.currentTimeMillis();
-
-                    ArrayList<Item> items = new ArrayList<>();
-                    NodeList itemNodes = orderElement.getElementsByTagName("Item");
-
-                    for (int j = 0; j < itemNodes.getLength(); j++) {
-                        Element itemElement = (Element) itemNodes.item(j);
-                        String name = itemElement.getAttribute("type");
-                        double price = Double.parseDouble(
-                                itemElement.getElementsByTagName("Price")
-                                        .item(0).getTextContent().trim()
-                        );
-                        int quantity = Integer.parseInt(
-                                itemElement.getElementsByTagName("Quantity")
-                                        .item(0).getTextContent().trim()
-                        );
-                        items.add(new Item(name, price, quantity));
-                    }
-
-                    orderManager.addOrder(type, orderDate, items);
-                    System.out.println("[Watcher] Successfully imported XML order from: " + file.getName());
-
-                    if (onOrderImported != null) onOrderImported.run();
-
-                } catch (Exception e) {
-                    System.out.println("[Watcher] Invalid order: " + e.getMessage());
-                }
-            }
-
-        } catch (Exception e) {
-            System.out.println("[Watcher] Failed to parse XML file: " + file.getName());
-            System.out.println("[Watcher] Reason: " + e.getMessage());
-        }
-
-    }
 }
 
