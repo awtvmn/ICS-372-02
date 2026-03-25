@@ -72,6 +72,7 @@ public class Directory {
 
             } else {
                 System.out.println("[Watcher] Unsupported file: " + fileName);
+                importedFiles.add(fileName);
             }
 
         }
