@@ -20,6 +20,7 @@ import javafx.scene.text.TextFlow;
 import javafx.scene.text.Text;
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * MainGUI class - Feature 6
@@ -66,7 +67,7 @@ public class MainGUI extends Application {
                 }
                 String icon;
 
-                if(order.getOrderStatus() == OrderStatus.COMPLETED) {
+                if (order.getOrderStatus() == OrderStatus.COMPLETED) {
                     icon = "✅";
                 } else if (order.getType().equalsIgnoreCase("delivery")) {
                     icon = "🚗";
@@ -77,12 +78,13 @@ public class MainGUI extends Application {
                 }
 
                 setText(icon + "Order #" + order.getOrderID()
-                                + " | " + order.getType()
-                                + " | " + order.getOrderStatus());
+                        + " | " + order.getType()
+                        + " | " + order.getOrderStatus());
 
                 String color;
-
-                if(order.getOrderStatus() == OrderStatus.COMPLETED){
+                if(order.getOrderStatus() == OrderStatus.CANCELED){
+                    color = "gray";
+                } else if(order.getOrderStatus() == OrderStatus.COMPLETED){
                     color = "green";
                 } else if (order.getType().equalsIgnoreCase("delivery")){
                     color = "red";
@@ -104,12 +106,13 @@ public class MainGUI extends Application {
         Button btnStart      = new Button("Start Order");
         Button btnComplete   = new Button("Complete Order");
         Button btnDisplay    = new Button("Display Order");
+        Button btnCancel     = new Button("Cancel Order");
         Button btnUncomplete = new Button("Show Uncompleted Orders");
         Button btnExport     = new Button("Export All Orders");
 
         // make all buttons same width
         for (Button b : new Button[]{btnStart, btnComplete,
-                btnDisplay, btnUncomplete, btnExport}) {
+                btnDisplay, btnCancel, btnUncomplete, btnExport}) {
             b.setMaxWidth(Double.MAX_VALUE);
         }
 
@@ -118,6 +121,7 @@ public class MainGUI extends Application {
                 btnStart,
                 btnComplete,
                 btnDisplay,
+                btnCancel,
                 new Separator(),
                 btnUncomplete,
                 btnExport
@@ -137,6 +141,7 @@ public class MainGUI extends Application {
         btnStart.setOnAction(e -> handleAction("start"));
         btnComplete.setOnAction(e -> handleAction("complete"));
         btnDisplay.setOnAction(e -> handleAction("display"));
+        btnCancel.setOnAction(e -> handleAction("cancel"));
         btnUncomplete.setOnAction(e -> handleShowUncompleted());
         btnExport.setOnAction(e -> handleExport());
 
@@ -172,8 +177,9 @@ public class MainGUI extends Application {
         if (action.equals("start")) {
             OrderStatus statusBefore = orderManager.getAllOrders().get(orderID).getOrderStatus();
             orderManager.startOrder(orderID);
-
-            if (statusBefore == OrderStatus.IN_PROGRESS) {
+            if(statusBefore == OrderStatus.CANCELED) {
+                log("Order #" + orderID + " cannot be started. It has been canceled.");
+            } else if (statusBefore == OrderStatus.IN_PROGRESS) {
                 log("Order #" + orderID + " is already started.", Color.RED);
             } else if (statusBefore == OrderStatus.COMPLETED) {
                 log("Order #" + orderID + " is already completed.", Color.RED);
@@ -184,8 +190,9 @@ public class MainGUI extends Application {
         } else if (action.equals("complete")) {
             OrderStatus statusBefore = orderManager.getAllOrders().get(orderID).getOrderStatus();
             orderManager.completeOrder(orderID);
-
-            if (statusBefore == OrderStatus.COMPLETED) {
+            if(statusBefore == OrderStatus.CANCELED) {
+                log("Order #" + orderID + " has been canceled. Cancelled orders cannot be completed.");
+            } else if (statusBefore == OrderStatus.COMPLETED) {
                 log("Order #" + orderID + " is already completed.", Color.RED);
             } else if (statusBefore == OrderStatus.INCOMING) {
                 log("Order #" + orderID + " cannot be completed. Must be started first.", Color.RED);
@@ -198,7 +205,11 @@ public class MainGUI extends Application {
             if(order == null){
                 log("Order not found.");
                 return;
+            } else if (order.getOrderStatus() == OrderStatus.CANCELED) {
+                log("Canceled orders cannot be displayed.");
+                return;
             }
+
 
             log("---Order Details---");
             log("Order ID: " + order.getOrderID());
@@ -215,6 +226,36 @@ public class MainGUI extends Application {
                         + "(Quantity: " + item.getQuantity()
                         + ", Price: $" + item.getPrice() + ")");
             }
+        } else if (action.equals("cancel")) {
+            OrderStatus statusBefore = orderManager.getAllOrders().get(orderID).getOrderStatus();
+            if(statusBefore == OrderStatus.COMPLETED) {
+                log("Order #" + orderID + " has been completed and can no longer be canceled.");
+                return;
+            } else if (statusBefore == OrderStatus.CANCELED) {
+                log("Order #" + orderID + " has already been canceled.");
+            } else {
+                TextInputDialog dialog = new TextInputDialog("...");
+                dialog.setTitle("Cancel order?");
+                dialog.setHeaderText("Please enter reason to cancel order.");
+                dialog.setContentText("Reason:");
+                Optional<String> reason = dialog.showAndWait();
+
+                // Handle the reason
+                if (reason.isPresent() && !reason.get().trim().isEmpty()) {
+                    orderManager.cancelOrder(orderID);
+                    if (statusBefore == OrderStatus.IN_PROGRESS) {
+                        log("Order # " + orderID + " has stopped being fulfilled and been canceled. Reason: " + reason.get());
+                    } else {
+                        log("Order # " + orderID + " is canceled. Reason: " + reason.get());
+
+                    }
+
+                } else {
+                    log("No reason entered. Order has not been canceled");
+                }
+            }
+
+
         }
 
         refreshOrderList();
