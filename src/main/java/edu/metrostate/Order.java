@@ -48,6 +48,16 @@ public abstract class Order {
         return false;
     }
 
+    public boolean cancelOrder() {
+        if (status == OrderStatus.INCOMING){
+            status = OrderStatus.CANCELED;
+            return true;
+        } else if (status == OrderStatus.IN_PROGRESS){
+            status = OrderStatus.CANCELED;
+        }
+        return false;
+    }
+
     /**
      * completeOrder method, returns true if in progress orders can be completed
      * @return boolean

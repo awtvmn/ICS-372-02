@@ -8,6 +8,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.ArrayList;
+import java.util.Scanner;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -83,6 +85,7 @@ public class OrderManager {
         }
 
     }
+
     // Requirement 8
     public void incompleteOrder(){
         boolean hasUncompletedOrders = false;
@@ -99,6 +102,20 @@ public class OrderManager {
 
         if(!hasUncompletedOrders){
             System.out.println("No uncompleted orders.");
+        }
+    }
+
+    public void cancelOrder(int orderID){
+        Order order = allOrders.get(orderID);
+        if(order == null) {
+            System.out.println("Order not found.");
+            return;
+        }
+        if (order.cancelOrder()){
+            System.out.println("Order " + orderID + " has been canceled.");
+
+        } else {
+            System.out.println("Order " + orderID + " has been canceled or completed already.");
         }
     }
 
