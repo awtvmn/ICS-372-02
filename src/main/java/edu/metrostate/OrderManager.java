@@ -28,10 +28,13 @@ public class OrderManager {
             newOrder = new ShipOrder(nextOrderID, orderDate, items);
         } else if (type.equals("pickup")) {
             newOrder = new PickupOrder(nextOrderID, orderDate, items);
+        } else if (type.equals("delivery")) {
+            newOrder = new DeliveryOrder(nextOrderID, orderDate, items);
         } else {
             System.out.println("Unknown order type.");
             return -1;
         }
+
 
         // Assigns new order to an ID
         allOrders.put(nextOrderID, newOrder); //puts it in the hash
