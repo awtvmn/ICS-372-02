@@ -1,5 +1,6 @@
 plugins {
     id("java")
+    id("org.openjfx.javafxplugin") version "0.1.0"
 }
 
 group = "edu.metrostate"
@@ -9,6 +10,11 @@ repositories {
     mavenCentral()
 }
 
+javafx {
+    version = "21"
+    modules("javafx.controls", "javafx.fxml")
+}
+
 dependencies {
     implementation("com.googlecode.json-simple:json-simple:1.1.1")
     implementation("com.google.code.gson:gson:2.13.2")
@@ -16,6 +22,7 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
+
 
 tasks.test {
     useJUnitPlatform()
