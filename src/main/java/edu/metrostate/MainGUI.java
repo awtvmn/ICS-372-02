@@ -170,12 +170,28 @@ public class MainGUI extends Application {
 
         // perform the action
         if (action.equals("start")) {
+            OrderStatus statusBefore = orderManager.getAllOrders().get(orderID).getOrderStatus();
             orderManager.startOrder(orderID);
-            log("Started order #" + orderID);
+
+            if (statusBefore == OrderStatus.IN_PROGRESS) {
+                log("Order #" + orderID + " is already started.", Color.RED);
+            } else if (statusBefore == OrderStatus.COMPLETED) {
+                log("Order #" + orderID + " is already completed.", Color.RED);
+            } else {
+                log("Started order #" + orderID, Color.BLUE);
+            }
 
         } else if (action.equals("complete")) {
+            OrderStatus statusBefore = orderManager.getAllOrders().get(orderID).getOrderStatus();
             orderManager.completeOrder(orderID);
-            log("Completed order #" + orderID);
+
+            if (statusBefore == OrderStatus.COMPLETED) {
+                log("Order #" + orderID + " is already completed.", Color.RED);
+            } else if (statusBefore == OrderStatus.INCOMING) {
+                log("Order #" + orderID + " cannot be completed. Must be started first.", Color.RED);
+            } else {
+                log("Completed order #" + orderID, Color.GREEN);
+            }
 
         } else if (action.equals("display")) {
             Order order = orderManager.getAllOrders().get(orderID);
