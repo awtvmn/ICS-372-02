@@ -68,7 +68,6 @@ public class Directory {
 
             } else if (fileName.endsWith(".xml")) {
                 System.out.println("[Watcher] Found XML file: " + fileName);
-                importXML(file);
                 importedFiles.add(fileName);
 
             } else {
