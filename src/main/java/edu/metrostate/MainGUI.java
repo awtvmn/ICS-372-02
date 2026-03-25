@@ -126,7 +126,12 @@ public class MainGUI extends Application {
         buttonPanel.setPadding(new Insets(0, 0, 0, 10));
 
         // bottom - output messages
-        outputArea.setPrefHeight(150);
+        ScrollPane scrollPane = new ScrollPane(outputArea);
+        scrollPane.setPrefHeight(150);
+        scrollPane.setFitToWidth(true);
+        // auto scroll to bottom when new text is added
+        outputArea.heightProperty().addListener((obs, oldVal, newVal) ->
+                scrollPane.setVvalue(1.0));
 
         // connect buttons to their actions
         btnStart.setOnAction(e -> handleAction("start"));
@@ -137,7 +142,7 @@ public class MainGUI extends Application {
 
         // put it all together
         HBox centerPanel = new HBox(leftPanel, buttonPanel);
-        VBox root = new VBox(10, centerPanel, new Label("Output:"), outputArea);
+        VBox root = new VBox(10, centerPanel, new Label("Output:"), scrollPane);
         root.setPadding(new Insets(15));
 
         // show the window
@@ -183,7 +188,7 @@ public class MainGUI extends Application {
             log("Order ID: " + order.getOrderID());
             log("Order Date: " + order.getOrderDate());
             log("Order Status: " + order.getOrderStatus(),
-                    order.getOrderStatus() == OrderStatus.COMPLETED ? Color.GREEN : Color.YELLOW);
+                    order.getOrderStatus() == OrderStatus.COMPLETED ? Color.GREEN : Color.PURPLE);
             log("Order Type: " + order.getType(),
                     order.getType().equalsIgnoreCase("delivery") ? Color.RED :
                     order.getType().equalsIgnoreCase("ship") ? Color.BLUE : Color.ORANGE);
