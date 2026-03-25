@@ -72,7 +72,7 @@ public class MainGUI extends Application {
                 } else if (order.getType().equalsIgnoreCase("delivery")) {
                     icon = "🚗";
                 } else if (order.getType().equalsIgnoreCase("ship")) {
-                    icon = "✈️";
+                    icon = "🛫";
                 } else {
                     icon = "🛒";
                 }
@@ -210,13 +210,22 @@ public class MainGUI extends Application {
                 return;
             }
 
+            String typeIcon;
+            if(order.getType().equalsIgnoreCase("delivery")){
+                typeIcon = "🚗";
+            } else if (order.getType().equalsIgnoreCase("ship")){
+                typeIcon = "🛫";
+            } else {
+                typeIcon = "🛒";
+            }
+
 
             log("---Order Details---");
             log("Order ID: " + order.getOrderID());
             log("Order Date: " + order.getOrderDate());
             log("Order Status: " + order.getOrderStatus(),
                     order.getOrderStatus() == OrderStatus.COMPLETED ? Color.GREEN : Color.PURPLE);
-            log("Order Type: " + order.getType(),
+            log(typeIcon + "Order Type: " + order.getType(),
                     order.getType().equalsIgnoreCase("delivery") ? Color.RED :
                     order.getType().equalsIgnoreCase("ship") ? Color.BLUE : Color.ORANGE);
 
