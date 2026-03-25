@@ -7,12 +7,18 @@ import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextArea;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 import javafx.animation.Timeline;
 import javafx.animation.KeyFrame;
 import javafx.util.Duration;
-
+import javafx.scene.paint.Color;
+import javafx.scene.text.TextFlow;
+import javafx.scene.text.Text;
+import java.util.ArrayList;
 import java.util.Map;
 
 /**
@@ -25,11 +31,11 @@ public class MainGUI extends Application {
     private Directory directory;
 
     // list of orders on the left
-    private ObservableList<String> orderListItems = FXCollections.observableArrayList();
-    private ListView<String> orderListView = new ListView<>(orderListItems);
+    private ObservableList<Order> orderListItems = FXCollections.observableArrayList();
+    private ListView<Order> orderListView = new ListView<>(orderListItems);
 
     // bottom text
-    private TextArea outputArea = new TextArea();
+    private TextFlow outputArea = new TextFlow();
 
     /**
      * start - runs when the app launches, builds the window
@@ -47,6 +53,48 @@ public class MainGUI extends Application {
         Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(3), e -> directory.checkFolder()));
         timeline.setCycleCount(Timeline.INDEFINITE);
         timeline.play();
+
+        orderListView.setCellFactory(listView -> new ListCell<>(){
+            @Override
+            protected void updateItem(Order order, boolean empty) {
+                super.updateItem(order, empty);
+                if (order == null || empty) {
+                    setText(null);
+                    setStyle("");
+                    setGraphic(null);
+                    return;
+                }
+                String icon;
+
+                if(order.getOrderStatus() == OrderStatus.COMPLETED) {
+                    icon = "✅";
+                } else if (order.getType().equalsIgnoreCase("delivery")) {
+                    icon = "🚗";
+                } else if (order.getType().equalsIgnoreCase("ship")) {
+                    icon = "✈️";
+                } else {
+                    icon = "🛒";
+                }
+
+                setText(icon + "Order #" + order.getOrderID()
+                                + " | " + order.getType()
+                                + " | " + order.getOrderStatus());
+
+                String color;
+
+                if(order.getOrderStatus() == OrderStatus.COMPLETED){
+                    color = "green";
+                } else if (order.getType().equalsIgnoreCase("delivery")){
+                    color = "red";
+                } else if (order.getType().equalsIgnoreCase("ship")){
+                    color = "blue";
+                } else {
+                    color = "orange";
+                }
+
+                setStyle("-fx-text-fill: " + color + "; -fx-font-weight: bold;");
+            }
+        });
 
         // left side - order list
         orderListView.setPrefWidth(300);
@@ -78,7 +126,6 @@ public class MainGUI extends Application {
         buttonPanel.setPadding(new Insets(0, 0, 0, 10));
 
         // bottom - output messages
-        outputArea.setEditable(false);
         outputArea.setPrefHeight(150);
 
         // connect buttons to their actions
@@ -107,20 +154,14 @@ public class MainGUI extends Application {
      * User must select an order from the list first
      */
     private void handleAction(String action) {
-        String selected = orderListView.getSelectionModel().getSelectedItem();
+        Order selected = orderListView.getSelectionModel().getSelectedItem();
         if (selected == null) {
             log("Please select an order from the list first.");
             return;
         }
 
         // get the order ID from the selected list item
-        int orderID;
-        try {
-            orderID = Integer.parseInt(selected.split("#")[1].split(" ")[0]);
-        } catch (Exception e) {
-            log("Could not read order ID.");
-            return;
-        }
+        int orderID = selected.getOrderID();
 
         // perform the action
         if (action.equals("start")) {
@@ -132,8 +173,27 @@ public class MainGUI extends Application {
             log("Completed order #" + orderID);
 
         } else if (action.equals("display")) {
-            orderManager.displayOrder(orderID);
-            log("Displayed order #" + orderID);
+            Order order = orderManager.getAllOrders().get(orderID);
+            if(order == null){
+                log("Order not found.");
+                return;
+            }
+
+            log("---Order Details---");
+            log("Order ID: " + order.getOrderID());
+            log("Order Date: " + order.getOrderDate());
+            log("Order Status: " + order.getOrderStatus(),
+                    order.getOrderStatus() == OrderStatus.COMPLETED ? Color.GREEN : Color.YELLOW);
+            log("Order Type: " + order.getType(),
+                    order.getType().equalsIgnoreCase("delivery") ? Color.RED :
+                    order.getType().equalsIgnoreCase("ship") ? Color.BLUE : Color.ORANGE);
+
+            log("Items: ");
+            for(Item item : order.getItems()){
+                log("\t" + item.getName()
+                        + "(Quantity: " + item.getQuantity()
+                        + ", Price: $" + item.getPrice() + ")");
+            }
         }
 
         refreshOrderList();
@@ -170,18 +230,21 @@ public class MainGUI extends Application {
     private void refreshOrderList() {
         orderListItems.clear();
         for (Map.Entry<Integer, Order> entry : orderManager.getAllOrders().entrySet()) {
-            Order order = entry.getValue();
-            orderListItems.add("Order #" + order.getOrderID()
-                    + " | " + order.getType()
-                    + " | " + order.getOrderStatus());
+            orderListItems.add(entry.getValue());
         }
     }
 
     /**
      * Prints a message to the output area at the bottom
      */
-    private void log(String message) {
-        outputArea.appendText(message + "\n");
+    private void log(String message, Color color) {
+        Text text = new Text(message + "\n");
+        text.setFill(color);
+        outputArea.getChildren().add(text);
+    }
+
+    private void log(String message){
+        log(message, Color.BLACK);
     }
 
     /**

@@ -91,11 +91,7 @@ public class OrderManager {
 
         for(Order order : allOrders.values()){
             if(order.getOrderStatus() != OrderStatus.COMPLETED){
-                System.out.println("Order ID: " + order.getOrderID());
-                System.out.println("Order Date: " + order.getOrderDate());
-                System.out.println("Order Type: " + order.getType());
-                System.out.println("Order Status: " + order.getOrderStatus());
-                System.out.printf("Total Price: $%.2f%n", order.getTotalPrice());
+                displayOrder(order.getOrderID());
                 System.out.println();
                 hasUncompletedOrders = true;
             }

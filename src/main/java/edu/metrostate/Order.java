@@ -72,14 +72,25 @@ public abstract class Order {
         return total;
     }
 
+    public String getOrderType(){
+        if (type.equalsIgnoreCase("delivery")){
+            return "DELIVERY order";
+        }else if (type.equalsIgnoreCase("ship")){
+            return "SHIP order";
+        }else if (type.equalsIgnoreCase("pickup")){
+            return "PICKUP order";
+        } else{
+            return type.toUpperCase();
+        }
+    }
+
     /**
      * displayOrder method, prints out an order's id, type, date, status, and items
      */
     public void displayOrder() {
         System.out.println("Order ID: " + orderID);
-        System.out.println("Type: "  + type);
         System.out.println("Date: " + orderDate);
-        System.out.println("Status: " + status);
+        System.out.println(getOrderType() + " is " + getOrderStatus());
         System.out.println("Items: ");
         for (Item item : items) {
             System.out.printf("%s (Qty: %d, Price: $%.2f)\n", item.getName(), item.getQuantity(), item.getPrice());
