@@ -21,18 +21,16 @@ public class Main {
      */
     public static void main(String[] args) {
         OrderManager manager = new OrderManager();
-        //FileReader fr = new FileReader(order.json);
         JSONParser parser = new JSONParser();
         Scanner s = new Scanner(System.in);
 
         while (true) {
-            System.out.println("1. Add order from file");
-            System.out.println("2. Start order");
-            System.out.println("3. Display order");
-            System.out.println("4. Complete order");
-            System.out.println("5. Show uncompleted orders");
-            System.out.println("6. Export all order");
-            System.out.println("7. Exit");
+            System.out.println("1. Start order");
+            System.out.println("2. Display order");
+            System.out.println("3. Complete order");
+            System.out.println("4. Show uncompleted orders");
+            System.out.println("5. Export all order");
+            System.out.println("6. Exit");
             System.out.print("Enter choice: ");
 
             String input = s.nextLine();
@@ -45,78 +43,30 @@ public class Main {
             }
 
             if (choice == 1) {
-                // Requirement 1: Read JSON file
-                try {
-                    //asking for file name
-                    System.out.println("Enter order file (filename.json): ");
-                    String filename = "txt/" + s.nextLine(); //makes it easier to type filename
-                    File file = new File(filename);
-
-                    //checkin
-                    if (!file.exists()) {
-                        System.out.println("File does not exist");
-                        continue;
-                    }
-
-                    JSONObject js = (JSONObject) parser.parse(new FileReader(filename));
-
-                    //The software shall read and store the order type
-                    JSONObject order = (JSONObject) js.get("order");
-                    String type = (String) order.get("type");
-                    System.out.println("Type is " + type);
-
-                    long order_date = (long) order.get("order_date");
-                    System.out.println("Order date is " + order_date);
-
-                    // the following parses from JSON requested items, quantity,and item price of each order
-                    ArrayList<Item> items = new ArrayList<>();
-                    JSONArray itemsArray = (JSONArray) order.get("items");
-                    for (Object obj : itemsArray) {
-                        JSONObject item = (JSONObject) obj;
-                        String name = (String) item.get("name");
-                        long quantity = (long) item.get("quantity");
-                        double price = (double) item.get("price");
-
-                        items.add(new Item(name, price, (int) quantity));
-
-                        System.out.println("Item is " + name);
-                        System.out.println("Quantity is " + quantity);
-                        System.out.println("Price is $" + price);
-
-                    }
-
-                    // adds order to orderManager
-                    manager.addOrder(type, order_date, items);
-
-                } catch (IOException | ParseException e) {
-                    throw new RuntimeException(e);
-                }
-
-            } else if (choice == 2) {
                 System.out.print("Enter order ID: ");
                 int orderID = s.nextInt();
                 s.nextLine();
                 manager.startOrder(orderID);
 
-            } else if (choice == 3) {
+            } else if (choice == 2) {
                 System.out.print("Enter order ID: ");
                 int orderID = s.nextInt();
                 s.nextLine();
                 manager.displayOrder(orderID);
 
-            } else if (choice == 4) {
+            } else if (choice == 3) {
                 System.out.print("Enter order ID: ");
                 int orderID = s.nextInt();
                 s.nextLine();
                 manager.completeOrder(orderID);
 
-            } else if (choice == 5) {
+            } else if (choice == 4) {
                 manager.incompleteOrder();
 
-            } else if (choice == 6) {
+            } else if (choice == 5) {
                 manager.exportOrders();
 
-            } else if (choice == 7) {
+            } else if (choice == 6) {
                 System.out.println("Goodbye");
                 s.close();
                 return;

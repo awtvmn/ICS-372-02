@@ -1,5 +1,6 @@
 plugins {
     id("java")
+    id("application")
     id("org.openjfx.javafxplugin") version "0.1.0"
 }
 
@@ -26,4 +27,8 @@ dependencies {
 
 tasks.test {
     useJUnitPlatform()
+}
+
+application {
+    mainClass.set("edu.metrostate.MainGUI")
 }

@@ -106,6 +106,11 @@ public class OrderManager {
         }
     }
 
+    // used by the GUI to display the order list
+    public HashMap<Integer, Order> getAllOrders() {
+        return allOrders;
+    }
+
     // Requirement 7
     public void exportOrders() {
         JSONObject root = new JSONObject();

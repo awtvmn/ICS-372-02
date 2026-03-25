@@ -2,6 +2,7 @@
   "orders": [
     {
       "order_date": 1515354694451,
+      "price total ": 200.92000000000002,
       "type": "ship",
       "order_id": 1,
       "items": [
@@ -21,7 +22,7 @@
           "Quantity": 1
         }
       ],
-      "status": "COMPLETED"
+      "status": "INCOMING"
     },
     {
       "order_date": 1515354694451,
