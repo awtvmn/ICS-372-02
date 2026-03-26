@@ -10,10 +10,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
+import java.io.*;
 import java.nio.file.*;
-import java.io.FileReader;
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 
 /**
@@ -21,10 +19,12 @@ import java.util.ArrayList;
  * Checks the "watched/" folder every 3 seconds for new order files.
  * Automatically imports any new .json or .xml files it finds.
  */
-public class Directory {
+public class Directory implements Serializable {
     private static final String watchFolder = "watched";
     private final OrderManager orderManager;
     private ArrayList<String> importedFiles = new ArrayList<>();
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     private Runnable onOrderImported;
 

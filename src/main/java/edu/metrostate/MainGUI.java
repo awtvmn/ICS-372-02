@@ -43,14 +43,29 @@ public class MainGUI extends Application {
     private TextFlow outputArea = new TextFlow();
 
     /**
+     * init - if program has loaded before, loads progress from before
+     * feature 2
+     */
+    @Override
+    public void init() {
+        orderManager = new OrderManager();
+        orderManager.loadOrders();
+    }
+
+    /**
+     * stop - when program gets stopped, saves info for next time
+     * feature 2
+     */
+    @Override
+    public void stop() {
+        orderManager.saveOrder();
+    }
+
+    /**
      * start - runs when the app launches, builds the window
      */
     @Override
     public void start(Stage primaryStage) {
-
-        // create the order manager
-        orderManager = new OrderManager();
-
         // start the directory watcher (Feature 5)
         // checks the watched/ folder every 3 seconds for new files
         directory = new Directory(orderManager);

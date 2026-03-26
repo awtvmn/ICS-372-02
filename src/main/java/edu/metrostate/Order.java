@@ -1,16 +1,20 @@
 package edu.metrostate;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.ArrayList;
 
 /**
  * Order class, used to create different orders
  */
-public abstract class Order {
+public abstract class Order implements Serializable {
     protected int orderID;
     protected long orderDate;
     protected OrderStatus status;
     protected ArrayList<Item> items;
     protected String type;
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     //constructor
     public Order(int orderID, long orderDate, ArrayList<Item> items, String type) {
@@ -57,12 +61,18 @@ public abstract class Order {
         return false;
     }
 
+    /**
+     * cancelORder method, returns true if order has been canceled
+     * feature 1
+     * @return boolean
+     */
     public boolean cancelOrder() {
         if (status == OrderStatus.INCOMING){
             status = OrderStatus.CANCELED;
             return true;
         } else if (status == OrderStatus.IN_PROGRESS){
             status = OrderStatus.CANCELED;
+            return true;
         }
         return false;
     }

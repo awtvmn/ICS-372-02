@@ -1,12 +1,17 @@
 package edu.metrostate;
 
+import java.io.Serial;
+import java.io.Serializable;
+
 /**
  * Item class, used to create different item objects
  */
-public class Item {
+public class Item implements Serializable {
     private String name;
     private double price;
     private int quantity;
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     //constructor
     public Item(String name, double price, int quantity) {

@@ -3,9 +3,7 @@ package edu.metrostate;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.Scanner;
@@ -17,9 +15,11 @@ import com.google.gson.GsonBuilder;
  * OrderManager class, used to add, start, display complete or incomplete orders,
  * and export orders into a JSON file
  */
-public class OrderManager {
+public class OrderManager implements Serializable {
     private HashMap<Integer, Order> allOrders = new HashMap<>();
     private static int nextOrderID = 1;
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     //Requirement 2 & 3: add new orders
     public int addOrder(String type, long orderDate, ArrayList<Item> items) {
@@ -105,6 +105,7 @@ public class OrderManager {
         }
     }
 
+    //feature 1
     public void cancelOrder(int orderID){
         Order order = allOrders.get(orderID);
         if(order == null) {
@@ -153,8 +154,6 @@ public class OrderManager {
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         String prettyJson = gson.toJson(root);
 
-
-
         try (FileWriter writer = new FileWriter("exported json files/all-orders.json")) {
             //writer.write(root.toJSONString());
             writer.write(prettyJson);
@@ -162,9 +161,30 @@ public class OrderManager {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
 
+    //feature 2
+    public void loadOrders() {
+        File file = new File("allOrders.dat");
+        if(!file.exists()) {
+            return;
+        }
+        try {
+            ObjectInputStream temp = new ObjectInputStream( new FileInputStream(file));
+            allOrders = (HashMap<Integer, Order>) temp.readObject();
+        } catch (IOException | ClassNotFoundException e){
+            e.printStackTrace();
+        }
+    }
 
-
+    //feature 2
+    public void saveOrder() {
+        try {
+            ObjectOutputStream temp = new ObjectOutputStream(new FileOutputStream("allOrders.dat"));
+            temp.writeObject(allOrders);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 
