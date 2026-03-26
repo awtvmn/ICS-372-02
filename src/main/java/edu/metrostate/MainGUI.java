@@ -181,6 +181,7 @@ public class MainGUI extends Application {
 
         refreshOrderList();
         log("System ready. Please drag and drop your order file in \"watched\" folder.\nSystem will import any new files added into the folder every 3 seconds.");
+        log("To reset your order, please close your application, delete \"allOrders.dat\" and \"importedFiles.dat\" and reopen.");
     }
 
     /**
