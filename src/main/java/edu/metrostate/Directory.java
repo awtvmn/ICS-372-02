@@ -68,6 +68,7 @@ public class Directory {
 
             } else if (fileName.endsWith(".xml")) {
                 System.out.println("[Watcher] Found XML file: " + fileName);
+                importXML(file);
                 importedFiles.add(fileName);
 
             } else {
@@ -112,7 +113,75 @@ public class Directory {
             System.out.println("[Watcher] Reason: " + e.getMessage());
         }
     }
+    /**
+     * importXML - reads a XML order file and adds it to the OrderManager
+     */
+    private void importXML(File file) {
+        try {
+            // Set up XML parser
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            Document doc = builder.parse(file);
+            doc.getDocumentElement().normalize();
+
+            NodeList orderNodes = doc.getElementsByTagName("Order");
+            int importedCount = 0;
+
+            for (int i = 0; i < orderNodes.getLength(); i++) {
+                Element orderElement = (Element) orderNodes.item(i);
+
+                try {
+                    // Read order attributes
+                    int id = Integer.parseInt(orderElement.getAttribute("id"));
+                    String type = getTagValue(orderElement, "OrderType", "pickup").toLowerCase();
+                    long date = System.currentTimeMillis();
+
+                    ArrayList<Item> items = new ArrayList<>();
+
+                    // Parse items
+                    NodeList itemNodes = orderElement.getElementsByTagName("Item");
+                    for (int j = 0; j < itemNodes.getLength(); j++) {
+                        Element itemElement = (Element) itemNodes.item(j);
+                        String name;
+                        name = itemElement.getAttribute("type");
+
+                        if (name == null || name.isEmpty()) name = "Unknown Item";
+                        double price = Double.parseDouble(getTagValue(itemElement, "Price", "0"));
+                        int quantity = Integer.parseInt(getTagValue(itemElement, "Quantity", "1"));
+
+                        items.add(new Item(name, price, quantity));
+                    }
+
+                    // Add order to OrderManager
+                    orderManager.addOrder(type, date, items);
+
+                    importedCount++;
 
 
+                } catch (Exception ex) {
+                    System.out.println("[Watcher] Skipping invalid order in file " + file.getName() + ": " + ex.getMessage());
+                }
+            }
+
+            if (onOrderImported != null) onOrderImported.run();
+
+            System.out.println("[Watcher] Successfully imported " + importedCount + " orders from XML: " + file.getName());
+
+            if (onOrderImported != null) onOrderImported.run();
+
+        } catch (Exception e) {
+            System.out.println("[Watcher] Failed to import XML: " + file.getName());
+            System.out.println("[Watcher] Reason: " + e.getMessage());
+        }
+    }
+
+    // Helper method to get XML tag text
+    private String getTagValue(Element parent, String tagName, String defaultValue) {
+        NodeList nodes = parent.getElementsByTagName(tagName);
+        if (nodes.getLength() == 0) return defaultValue;
+        return nodes.item(0).getTextContent();
+    }
 }
+
+
 
