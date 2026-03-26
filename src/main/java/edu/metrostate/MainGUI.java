@@ -76,7 +76,7 @@ public class MainGUI extends Application {
                 } else if (order.getType().equalsIgnoreCase("delivery")) {
                     icon = "🚗";
                 } else if (order.getType().equalsIgnoreCase("ship")) {
-                    icon = "✈️";
+                    icon = "🛫";
                 } else {
                     icon = "🛒";
                 }
@@ -165,7 +165,7 @@ public class MainGUI extends Application {
         primaryStage.show();
 
         refreshOrderList();
-        log("System ready. Please create a new file in txt folder and put your orders in.\nYou can move your orders from txt folder to watched folder while app is running or before.");
+        log("System ready. Please drag and drop your order file in \"watched\" folder.\nSystem will import any new files added into the folder every 3 seconds.");
     }
 
     /**
@@ -219,13 +219,22 @@ public class MainGUI extends Application {
                 return;
             }
 
+            String typeIcon;
+            if(order.getType().equalsIgnoreCase("delivery")){
+                typeIcon = "🚗";
+            } else if (order.getType().equalsIgnoreCase("ship")){
+                typeIcon = "🛫";
+            } else {
+                typeIcon = "🛒";
+            }
+
 
             log("---Order Details---");
             log("Order ID: " + order.getOrderID());
             log("Order Date: " + order.getOrderDate());
             log("Order Status: " + order.getOrderStatus(),
                     order.getOrderStatus() == OrderStatus.COMPLETED ? Color.GREEN : Color.PURPLE);
-            log("Order Type: " + order.getType(),
+            log(typeIcon + "Order Type: " + order.getType(),
                     order.getType().equalsIgnoreCase("delivery") ? Color.RED :
                     order.getType().equalsIgnoreCase("ship") ? Color.BLUE : Color.ORANGE);
 
