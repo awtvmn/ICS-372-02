@@ -156,7 +156,7 @@ public class MainGUI extends Application {
         primaryStage.show();
 
         refreshOrderList();
-        log("System ready. Please create a new file in txt folder and put your orders in.\nYou can move your orders from txt folder to watched folder while app is running or before.");
+        log("System ready. Please drag and drop your order file in \"watched\" folder.\nSystem will import any new files added into the folder every 3 seconds.");
     }
 
     /**
