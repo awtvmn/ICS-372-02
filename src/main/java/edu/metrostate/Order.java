@@ -20,6 +20,15 @@ public abstract class Order {
         this.items = items;
         this.type = type;
     }
+    protected String sourceFile;
+
+    public void setSourceFile(String sourceFile) {
+        this.sourceFile = sourceFile;
+    }
+
+    public String getSourceFile() {
+        return sourceFile;
+    }
 
     //getters
     public int getOrderID(){

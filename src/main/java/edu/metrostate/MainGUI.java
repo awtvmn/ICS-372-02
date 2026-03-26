@@ -1,7 +1,9 @@
 package edu.metrostate;
-
+import java.io.File;
+import java.util.List;
 import javafx.application.Application;
 import javafx.application.Platform;
+
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
@@ -11,6 +13,8 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.*;
+import javafx.stage.FileChooser;
+
 import javafx.stage.Stage;
 import javafx.animation.Timeline;
 import javafx.animation.KeyFrame;
@@ -116,6 +120,8 @@ public class MainGUI extends Application {
             b.setMaxWidth(Double.MAX_VALUE);
         }
 
+
+
         VBox buttonPanel = new VBox(8,
                 new Label("Actions:"),
                 btnStart,
@@ -124,10 +130,13 @@ public class MainGUI extends Application {
                 btnCancel,
                 new Separator(),
                 btnUncomplete,
-                btnExport
+                btnExport,
+                new Separator()
         );
         buttonPanel.setPrefWidth(180);
         buttonPanel.setPadding(new Insets(0, 0, 0, 10));
+
+
 
         // bottom - output messages
         ScrollPane scrollPane = new ScrollPane(outputArea);
@@ -295,6 +304,7 @@ public class MainGUI extends Application {
             orderListItems.add(entry.getValue());
         }
     }
+
 
     /**
      * Prints a message to the output area at the bottom
