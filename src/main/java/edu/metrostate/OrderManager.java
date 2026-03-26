@@ -186,8 +186,4 @@ public class OrderManager implements Serializable {
             e.printStackTrace();
         }
     }
-
-
-
-
 }

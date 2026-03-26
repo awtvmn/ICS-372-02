@@ -48,8 +48,8 @@ public class MainGUI extends Application {
      */
     @Override
     public void init() {
-        orderManager = new OrderManager();
-        orderManager.loadOrders();
+        orderManager = new OrderManager(); //moved from start to have only one instance
+        orderManager.loadOrders(); //retrieves any previous data
     }
 
     /**
@@ -58,7 +58,7 @@ public class MainGUI extends Application {
      */
     @Override
     public void stop() {
-        orderManager.saveOrder();
+        orderManager.saveOrder(); //saves any new data
     }
 
     /**
@@ -259,7 +259,7 @@ public class MainGUI extends Application {
                         + "(Quantity: " + item.getQuantity()
                         + ", Price: $" + item.getPrice() + ")");
             }
-        } else if (action.equals("cancel")) {
+        } else if (action.equals("cancel")) { //feature 1
             OrderStatus statusBefore = orderManager.getAllOrders().get(orderID).getOrderStatus();
             if(statusBefore == OrderStatus.COMPLETED) {
                 log("Order #" + orderID + " has been completed and can no longer be canceled.");

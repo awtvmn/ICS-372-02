@@ -22,7 +22,7 @@ import java.util.ArrayList;
 public class Directory implements Serializable {
     private static final String watchFolder = "watched";
     private final OrderManager orderManager;
-    private ArrayList<String> importedFiles = new ArrayList<>();
+    private ArrayList<String> importedFiles;
     @Serial
     private static final long serialVersionUID = 1L;
 
@@ -31,6 +31,14 @@ public class Directory implements Serializable {
 
     public Directory(OrderManager orderManager) {
         this.orderManager = orderManager;
+
+        try {
+            ObjectInputStream temp = new ObjectInputStream( new FileInputStream("importedFiles.dat"));
+            importedFiles = (ArrayList<String>) temp.readObject();
+        } catch (Exception e) {
+            importedFiles = new ArrayList<>();
+        }
+
         File folder = new File(watchFolder);
         if(!folder.exists()) {
             folder.mkdir();
@@ -65,19 +73,36 @@ public class Directory implements Serializable {
                 System.out.println("[Watcher] Found JSON file: " + fileName);
                 importJSON(file);
                 importedFiles.add(fileName);
+                saveImportedFiles();
 
             } else if (fileName.endsWith(".xml")) {
                 System.out.println("[Watcher] Found XML file: " + fileName);
                 importXML(file);
                 importedFiles.add(fileName);
+                saveImportedFiles();
 
             } else {
                 System.out.println("[Watcher] Unsupported file: " + fileName);
                 importedFiles.add(fileName);
+                saveImportedFiles();
             }
 
         }
 
+    }
+
+    /**
+     * saveImporedFiles - this is to make sure that the directory doesn't rewrite the saved data from my serialization
+     * part of feature 2
+     * to retest the code without adding new orders, allOrrders.dat and importedFiles.dat must both be deleted for a fresh start
+     */
+    public void saveImportedFiles() {
+        try {
+            ObjectOutputStream temp = new ObjectOutputStream(( new FileOutputStream("importedFiles.dat")));
+            temp.writeObject(importedFiles);
+        } catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
     /**
