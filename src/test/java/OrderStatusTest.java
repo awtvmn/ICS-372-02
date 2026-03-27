@@ -1,5 +1,4 @@
-package edu.metrostate;
-
+import edu.metrostate.*;
 import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 
