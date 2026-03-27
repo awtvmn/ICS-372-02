@@ -239,6 +239,51 @@ public class OrderManager implements Serializable {
     }
 
     /**
+     * Exports all orders to a XML file called "exported xml files"
+     */
+    public void exportXML() {
+        File folder = new File("exported xml files");
+        if (!folder.exists()) folder.mkdir();
+
+        StringBuilder xml = new StringBuilder();
+        xml.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+        xml.append("<Orders>\n");
+
+        for (Order order : allOrders.values()) {
+            xml.append("    <Order id=\"").append(order.getOrderID()).append("\">\n");
+            xml.append("        <OrderType>").append(order.getType()).append("</OrderType>\n");
+            xml.append("        <Status>").append(order.getOrderStatus()).append("</Status>\n");
+
+            if (order.getOrderStatus() != OrderStatus.COMPLETED) {
+                xml.append("        <PriceTotal>").append(order.getTotalPrice()).append("</PriceTotal>\n");
+            }
+
+            if (order.getSourceFile() != null) {
+                xml.append("        <SourceFile>").append(order.getSourceFile()).append("</SourceFile>\n");
+            }
+
+            for (Item item : order.getItems()) {
+                xml.append("        <Item type=\"").append(item.getName()).append("\">\n");
+                xml.append("            <Price>").append(item.getPrice()).append("</Price>\n");
+                xml.append("            <Quantity>").append(item.getQuantity()).append("</Quantity>\n");
+                xml.append("        </Item>\n");
+            }
+
+            xml.append("    </Order>\n");
+        }
+
+        xml.append("</Orders>");
+
+        try (FileWriter writer = new FileWriter("exported xml files/all-orders.xml")) {
+            writer.write(xml.toString());
+            System.out.println("All orders exported successfully.");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    /**
      * Loads previously saved orders from disk when the program starts.
      * Feature 2
      */

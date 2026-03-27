@@ -345,8 +345,8 @@ public class MainGUI extends Application {
      * Exports all orders to a JSON file
      */
     private void handleExport() {
-        orderManager.exportOrders();
-        log("Orders exported successfully.\nAll exported orders are in exported json files");
+        orderManager.exportXML();
+        log("Orders exported successfully.\nAll exported orders are in exported xml files");
     }
 
     /**
