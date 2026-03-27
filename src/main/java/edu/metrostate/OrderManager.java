@@ -47,7 +47,7 @@ public class OrderManager implements Serializable {
 
         // Assigns new order to an ID
         allOrders.put(nextOrderID, newOrder); //puts it in the hash
-        System.out.println("Order " + nextOrderID + " added successfully.");
+        System.out.println("    Order " + nextOrderID + " added successfully.");
         nextOrderID++; // increm by 1
 
     }
@@ -64,7 +64,7 @@ public class OrderManager implements Serializable {
      */
     public void addOrderWithID(int orderID, String type, ArrayList<Item> items, String sourceFile) {
         if (allOrders.containsKey(orderID)) {
-            System.out.println("Order #" + orderID + " already exists, Reassigning to #" + nextOrderID);
+            System.out.println("    Order #" + orderID + " already exists, Reassigning to #" + nextOrderID);
             orderID = nextOrderID;
         }
 
@@ -76,7 +76,7 @@ public class OrderManager implements Serializable {
         } else if (type.equals("delivery")) {
             newOrder = new DeliveryOrder(orderID, 0, items);
         } else {
-            System.out.println("Unknown order type: " + type);
+            System.out.println("    Unknown order type: " + type);
             return;
         }
 
@@ -85,7 +85,7 @@ public class OrderManager implements Serializable {
         allOrders.put(orderID, newOrder);
 
         if (orderID >= nextOrderID) nextOrderID = orderID + 1;
-        System.out.println("Order #" + orderID + " imported successfully.");
+        System.out.println("    Order #" + orderID + " imported successfully.");
     }
 
 

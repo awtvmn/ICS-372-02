@@ -79,12 +79,12 @@ public class Directory implements Serializable {
             if (importedFiles.contains(fileName)) continue;
 
             if (fileName.endsWith(".xml")) {
-                System.out.println("[Watcher] Found XML file: " + fileName);
+                System.out.println("\n--- Importing: " + fileName + " ---");
                 importXML(file);
                 importedFiles.add(fileName);
                 saveImportedFiles();
             } else {
-                System.out.println("[Watcher] Unsupported file: " + fileName);
+                System.out.println("\n--- Unsupported file: " + fileName);
                 importedFiles.add(fileName);
                 saveImportedFiles();
             }
@@ -146,24 +146,30 @@ public class Directory implements Serializable {
                         items.add(new Item(name, price, quantity));
                     }
 
+                    int sizeBefore = orderManager.getAllOrders().size();
                     orderManager.addOrderWithID(orderID, type, items, file.getName());
-                    importedCount++;
+                    if (orderManager.getAllOrders().size() > sizeBefore) {
+                        importedCount++;}
 
 
 
                 } catch (Exception ex) {
-                    System.out.println("[Watcher] Skipping invalid order in file " + file.getName() + ": " + ex.getMessage());
+                    System.out.println("    Skipping invalid order in file " + file.getName() + ": " + ex.getMessage());
                 }
             }
 
-            System.out.println("[Watcher] Successfully imported " + importedCount + " orders from XML: " + file.getName());
+            if (importedCount == 0) {
+                System.out.println("--- No orders imported from " + file.getName() + " ---");
+            } else {
+                System.out.println("--- Successfully imported " + importedCount + " order(s) from " + file.getName() + " ---");
+            }
 
             // Refresh GUI
             if (onOrderImported != null) onOrderImported.run();
 
         } catch (Exception e) {
-            System.out.println("[Watcher] Failed to import XML: " + file.getName());
-            System.out.println("[Watcher] Reason: " + e.getMessage());
+            System.out.println("--- Failed to import XML: " + file.getName());
+            System.out.println("    Reason: " + e.getMessage());
         }
     }
 
