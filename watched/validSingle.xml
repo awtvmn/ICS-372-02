@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Orders>
+    <Order id="1">
+        <OrderType>delivery</OrderType>
+        <Items>
+            <Item type="Headphones">
+                <Price>89.99</Price>
+                <Quantity>1</Quantity>
+            </Item>
+            <Item type="Phone Case">
+                <Price>12.99</Price>
+                <Quantity>2</Quantity>
+            </Item>
+        </Items>
+    </Order>
+</Orders>

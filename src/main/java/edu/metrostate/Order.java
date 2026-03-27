@@ -62,7 +62,7 @@ public abstract class Order implements Serializable {
     }
 
     /**
-     * cancelORder method, returns true if order has been canceled
+     * cancelOrder method, returns true if order has been canceled
      * feature 1
      * @return boolean
      */

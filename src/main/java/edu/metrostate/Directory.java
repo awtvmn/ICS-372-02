@@ -1,9 +1,5 @@
 package edu.metrostate;
 
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import org.w3c.dom.Document;
@@ -11,13 +7,13 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
 import java.io.*;
-import java.nio.file.*;
 import java.util.ArrayList;
 
 /**
- * Directory class - Feature 5
+ * Directory class - Feature 5.
  * Checks the "watched/" folder every 3 seconds for new order files.
- * Automatically imports any new .json or .xml files it finds.
+ * Automatically imports any new .xml files it finds.
+ * Feature 5
  */
 public class Directory implements Serializable {
     private static final String watchFolder = "watched";
@@ -29,11 +25,17 @@ public class Directory implements Serializable {
     private Runnable onOrderImported;
 
 
+    /**
+     * Constructs a Directory watcher.
+     * Loads the list of previously imported files from disk
+     * Creates the watched/ folder if it does not already exist.
+     *
+     * @param orderManager the OrderManager to add imported orders into
+     */
     public Directory(OrderManager orderManager) {
         this.orderManager = orderManager;
 
-        try {
-            ObjectInputStream temp = new ObjectInputStream( new FileInputStream("importedFiles.dat"));
+        try (ObjectInputStream temp = new ObjectInputStream( new FileInputStream("importedFiles.dat"))) {
             importedFiles = (ArrayList<String>) temp.readObject();
         } catch (Exception e) {
             importedFiles = new ArrayList<>();
@@ -47,14 +49,22 @@ public class Directory implements Serializable {
         System.out.println("Watching folder:" + folder.getAbsolutePath());
     }
 
+    /**
+     * Sets the callback to run after a new order is successfully imported.
+     * Used by MainGUI to refresh the order list when a file is detected.
+     *
+     * @param callback the Runnable to call after a successful import
+     */
     public void setOnOrderImported(Runnable callback) {
         this.onOrderImported = callback;
     }
 
 
     /**
-     * checkFolder - checks the watched/ folder for new files.
-     * Called every 3 seconds from MainGUI.
+     * Checks the watched/ folder for new files.
+     * Called every 3 seconds from MainGUI
+     * Skips empty files and files that have already been imported.
+     * Supports .xml files only - Feature 3
      */
     public void checkFolder() {
         File folder = new File(watchFolder);
@@ -66,21 +76,13 @@ public class Directory implements Serializable {
             String fileName = file.getName().toLowerCase();
 
             if (file.length() == 0) continue;
-
             if (importedFiles.contains(fileName)) continue;
 
-            if (fileName.endsWith(".json")) {
-                System.out.println("[Watcher] Found JSON file: " + fileName);
-                importJSON(file);
-                importedFiles.add(fileName);
-                saveImportedFiles();
-
-            } else if (fileName.endsWith(".xml")) {
+            if (fileName.endsWith(".xml")) {
                 System.out.println("[Watcher] Found XML file: " + fileName);
                 importXML(file);
                 importedFiles.add(fileName);
                 saveImportedFiles();
-
             } else {
                 System.out.println("[Watcher] Unsupported file: " + fileName);
                 importedFiles.add(fileName);
@@ -92,58 +94,27 @@ public class Directory implements Serializable {
     }
 
     /**
-     * saveImporedFiles - this is to make sure that the directory doesn't rewrite the saved data from my serialization
-     * part of feature 2
-     * to retest the code without adding new orders, allOrrders.dat and importedFiles.dat must both be deleted for a fresh start
+     * Saves the list of imported file names to disk.
+     * Ensures already-imported files are not re-imported on the next session.
+     * Part of Feature 2
+     * Note: to reset, delete both allOrders.dat and importedFiles.dat.
      */
     public void saveImportedFiles() {
-        try {
-            ObjectOutputStream temp = new ObjectOutputStream(( new FileOutputStream("importedFiles.dat")));
+        try (ObjectOutputStream temp = new ObjectOutputStream( new FileOutputStream("importedFiles.dat"))) {
             temp.writeObject(importedFiles);
         } catch (Exception e){
             e.printStackTrace();
         }
     }
 
+
     /**
-     * importJSON - reads a JSON order file and adds it to the OrderManager
-     */
-    private void importJSON(File file) {
-        try {
-            JSONParser parser = new JSONParser();
-            JSONObject js = (JSONObject) parser.parse(new FileReader(file));
-            JSONObject order = (JSONObject) js.get("order");
-
-            String type = (String) order.get("type");
-            long orderDate = (long) order.get("order_date");
-
-            ArrayList<Item> items = new ArrayList<>();
-            JSONArray itemsArray = (JSONArray) order.get("items");
-
-            for (Object obj : itemsArray) {
-                JSONObject item = (JSONObject) obj;
-                String name = (String) item.get("name");
-                long quantity = (long) item.get("quantity");
-                double price = (double) item.get("price");
-                items.add(new Item(name, price, (int) quantity));
-            }
-
-            orderManager.addOrder(type, orderDate, items);
-            System.out.println("[Watcher] Successfully imported JSON: " + file.getName());
-
-            if (onOrderImported != null) onOrderImported.run();
-
-        } catch (Exception e) {
-            System.out.println("[Watcher] Failed to import JSON: " + file.getName());
-            System.out.println("[Watcher] Reason: " + e.getMessage());
-        }
-    }
-    /**
-     * importXML - reads a XML order file and adds it to the OrderManager
+     * Reads an XML order file and adds orders to the OrderManager.
+     * Skips order that are invalid or missing fields
+     * @param file the XML file to import
      */
     private void importXML(File file) {
         try {
-            // Set up XML parser
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             DocumentBuilder builder = factory.newDocumentBuilder();
             Document doc = builder.parse(file);
@@ -157,9 +128,8 @@ public class Directory implements Serializable {
 
                 try {
                     // Read order attributes
-                    int id = Integer.parseInt(orderElement.getAttribute("id"));
+                    int orderID = Integer.parseInt(orderElement.getAttribute("id"));
                     String type = getTagValue(orderElement, "OrderType", "pickup").toLowerCase();
-                    long date = System.currentTimeMillis();
 
                     ArrayList<Item> items = new ArrayList<>();
 
@@ -167,8 +137,7 @@ public class Directory implements Serializable {
                     NodeList itemNodes = orderElement.getElementsByTagName("Item");
                     for (int j = 0; j < itemNodes.getLength(); j++) {
                         Element itemElement = (Element) itemNodes.item(j);
-                        String name;
-                        name = itemElement.getAttribute("type");
+                        String name = itemElement.getAttribute("type");
 
                         if (name == null || name.isEmpty()) name = "Unknown Item";
                         double price = Double.parseDouble(getTagValue(itemElement, "Price", "0"));
@@ -177,10 +146,9 @@ public class Directory implements Serializable {
                         items.add(new Item(name, price, quantity));
                     }
 
-                    // Add order to OrderManager
-                    orderManager.addOrder(type, date, items);
-
+                    orderManager.addOrderWithID(orderID, type, items, file.getName());
                     importedCount++;
+
 
 
                 } catch (Exception ex) {
@@ -188,10 +156,9 @@ public class Directory implements Serializable {
                 }
             }
 
-            if (onOrderImported != null) onOrderImported.run();
-
             System.out.println("[Watcher] Successfully imported " + importedCount + " orders from XML: " + file.getName());
 
+            // Refresh GUI
             if (onOrderImported != null) onOrderImported.run();
 
         } catch (Exception e) {
@@ -200,7 +167,15 @@ public class Directory implements Serializable {
         }
     }
 
-    // Helper method to get XML tag text
+    /**
+     * Returns the text content of a child element within a parent element.
+     * Returns a default value if the tag is not found.
+     *
+     * @param parent       the parent XML element to search within
+     * @param tagName      the name of the child tag to find
+     * @param defaultValue the value to return if the tag is not found
+     * @return the text content of the tag, or defaultValue if not found
+     */
     private String getTagValue(Element parent, String tagName, String defaultValue) {
         NodeList nodes = parent.getElementsByTagName(tagName);
         if (nodes.getLength() == 0) return defaultValue;

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Orders>
+    <Order id="1">
+        <OrderType>teleport</OrderType>
+        <Items>
+            <Item type="Magic Box">
+                <Price>999.99</Price>
+                <Quantity>1</Quantity>
+            </Item>
+        </Items>
+    </Order>
+</Orders>
