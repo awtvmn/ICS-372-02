@@ -3,7 +3,10 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.util.ArrayList;
 
-
+/**
+ * Unit tests for the PickShipDelivery class.
+ * Verifies that each order stores ID, date, type and items correctly
+ */
 public class PickShipDeliveryTest {
 
     //test ship order class using mock objects

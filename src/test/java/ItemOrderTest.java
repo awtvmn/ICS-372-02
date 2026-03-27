@@ -8,6 +8,10 @@ import java.util.ArrayList;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Unit tests for Item and Order class.
+ * Covers creating item, total price calculation and returning item
+ */
 public class ItemOrderTest {
 
     @Test
