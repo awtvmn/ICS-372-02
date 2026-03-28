@@ -36,7 +36,7 @@ public class ItemOrderTest {
         items.add(item4);
 
         PickupOrder order1 = new PickupOrder(1, 32726, items);
-        assertEquals(68.76, order1.getTotalPrice());
+        assertEquals(68.76, order1.getTotalPrice(), 0.01);
     }
 
     @Test

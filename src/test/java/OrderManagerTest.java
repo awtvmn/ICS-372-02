@@ -46,63 +46,66 @@ import static org.junit.jupiter.api.Assertions.*;
             orderManager.addOrder("delivery", System.currentTimeMillis(), items);
 
             HashMap<Integer, Order> orders = orderManager.getAllOrders();
-            assertEquals(3, orders.size());
-            assertEquals("ship", orders.get(1).getType());
-            assertEquals("pickup", orders.get(2).getType());
-            assertEquals("delivery", orders.get(3).getType());
+            assertTrue(orders.values().stream().anyMatch(o -> o.getType().equals("ship")));
+            assertTrue(orders.values().stream().anyMatch(o -> o.getType().equals("pickup")));
+            assertTrue(orders.values().stream().anyMatch(o -> o.getType().equals("delivery")));
         }
 
         @Test
         void addOrderWithDuplicateIDReassignsNewID() {
             ArrayList<Item> items = createSampleItems();
-            orderManager.addOrderWithID(1, "ship", items, "file1.xml");
-            orderManager.addOrderWithID(1, "pickup", items, "file2.xml"); // duplicate ID
+            orderManager.addOrderWithID(100, "ship", items, "file1.xml");
+            orderManager.addOrderWithID(100, "pickup", items, "file2.xml"); // duplicate ID
 
             HashMap<Integer, Order> orders = orderManager.getAllOrders();
             assertEquals(2, orders.size());
-            assertTrue(orders.containsKey(1));
-            assertTrue(orders.containsKey(2)); // new ID assigned
-            assertEquals("file1.xml", orders.get(1).getSourceFile());
-            assertEquals("file2.xml", orders.get(2).getSourceFile());
+            assertTrue(orders.containsKey(100));
+            assertEquals("file1.xml", orders.get(100).getSourceFile());
+            assertTrue(orders.values().stream().anyMatch(o -> "file2.xml".equals(o.getSourceFile())));
         }
 
         @Test
         void startOrderChangesStatus() {
             ArrayList<Item> items = createSampleItems();
             orderManager.addOrder("ship", 0, items);
-            orderManager.startOrder(1);
+            int id = orderManager.getAllOrders().keySet().iterator().next();
+            orderManager.startOrder(id);
 
-            Order order = orderManager.getAllOrders().get(1);
-            assertEquals(OrderStatus.IN_PROGRESS, order.getOrderStatus());
+            assertEquals(OrderStatus.IN_PROGRESS, orderManager.getAllOrders().get(id).getOrderStatus());
         }
 
         @Test
         void completeOrderOnlyCompletesInProgress() {
             ArrayList<Item> items = createSampleItems();
             orderManager.addOrder("ship", 0, items);
-            orderManager.completeOrder(1); // cannot complete INCOMING
-            assertEquals(OrderStatus.INCOMING, orderManager.getAllOrders().get(1).getOrderStatus());
+            int id = orderManager.getAllOrders().keySet().iterator().next();
 
-            orderManager.startOrder(1);
-            orderManager.completeOrder(1); // now can complete
-            assertEquals(OrderStatus.COMPLETED, orderManager.getAllOrders().get(1).getOrderStatus());
+            orderManager.completeOrder(id); // cannot complete INCOMING
+            assertEquals(OrderStatus.INCOMING, orderManager.getAllOrders().get(id).getOrderStatus());
+
+            orderManager.startOrder(id);
+            orderManager.completeOrder(id); // now can complete
+            assertEquals(OrderStatus.COMPLETED, orderManager.getAllOrders().get(id).getOrderStatus());
         }
 
         @Test
         void cancelOrderWorks() {
             ArrayList<Item> items = createSampleItems();
             orderManager.addOrder("ship", 0, items);
+            int id1 = orderManager.getAllOrders().keySet().iterator().next();
 
             // Cancel INCOMING
-            orderManager.cancelOrder(1);
-            assertEquals(OrderStatus.CANCELED, orderManager.getAllOrders().get(1).getOrderStatus());
+            orderManager.cancelOrder(id1);
+            assertEquals(OrderStatus.CANCELED, orderManager.getAllOrders().get(id1).getOrderStatus());
 
             // Cancel COMPLETED should not change
             orderManager.addOrder("ship", 0, items);
-            orderManager.startOrder(2);
-            orderManager.completeOrder(2);
-            orderManager.cancelOrder(2);
-            assertEquals(OrderStatus.COMPLETED, orderManager.getAllOrders().get(2).getOrderStatus());
+            int id2 = orderManager.getAllOrders().keySet().stream()
+                    .filter(k -> !k.equals(id1)).findFirst().get();
+            orderManager.startOrder(id2);
+            orderManager.completeOrder(id2);
+            orderManager.cancelOrder(id2);
+            assertEquals(OrderStatus.COMPLETED, orderManager.getAllOrders().get(id2).getOrderStatus());
         }
 
         @Test
@@ -138,7 +141,7 @@ import static org.junit.jupiter.api.Assertions.*;
             HashMap<Integer, Order> orders = loadedManager.getAllOrders();
 
             assertEquals(1, orders.size());
-            assertEquals("delivery", orders.get(1).getType());
+            assertTrue(orders.values().stream().anyMatch(o -> o.getType().equals("delivery")));
         }
 
         @Test

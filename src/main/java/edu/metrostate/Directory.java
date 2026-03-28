@@ -147,6 +147,9 @@ public class Directory implements Serializable {
                     }
 
                     int sizeBefore = orderManager.getAllOrders().size();
+                    if (orderManager.getAllOrders().containsKey(orderID)) {
+                        System.out.println("    Order #" + orderID + " already exists. Reassigning to new ID.");
+                    }
                     orderManager.addOrderWithID(orderID, type, items, file.getName());
                     if (orderManager.getAllOrders().size() > sizeBefore) {
                         importedCount++;}

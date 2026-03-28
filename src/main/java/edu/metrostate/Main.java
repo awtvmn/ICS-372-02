@@ -86,7 +86,7 @@ public class Main {
                     }
 
                     // adds order to orderManager
-                    manager.addOrder(type, order_date, items);
+                    System.out.println(manager.addOrder(type, order_date, items).getMessage());
                     filename = "txt/"; //starts filename over in order to add more files
 
                 } catch (IOException | ParseException e) {
@@ -97,7 +97,7 @@ public class Main {
                 System.out.print("Enter order ID: ");
                 int orderID = s.nextInt();
                 s.nextLine();
-                manager.startOrder(orderID);
+                System.out.println(manager.startOrder(orderID).getMessage());
 
             } else if (choice == 3) {
                 System.out.print("Enter order ID: ");
@@ -109,10 +109,20 @@ public class Main {
                 System.out.print("Enter order ID: ");
                 int orderID = s.nextInt();
                 s.nextLine();
-                manager.completeOrder(orderID);
+                System.out.println(manager.completeOrder(orderID).getMessage());
 
             } else if (choice == 5) {
-                manager.incompleteOrder();
+                java.util.List<Order> incomplete = manager.getIncompletedOrders();
+                if (incomplete.isEmpty()) {
+                    System.out.println("No uncompleted orders.");
+                } else {
+                    System.out.println("Uncompleted Orders: ");
+                    System.out.println();
+                    for (Order order : incomplete) {
+                        manager.displayOrder(order.getOrderID());
+                        System.out.println();
+                    }
+                }
 
             } else if (choice == 6) {
                 manager.exportOrders();

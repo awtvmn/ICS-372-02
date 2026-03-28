@@ -6,17 +6,26 @@ import java.util.ArrayList;
 
 /**
  * Order class, used to create different orders
+ * Abstract class for ShipOrder, PickupOrder, and DeliveryOrder.
  */
 public abstract class Order implements Serializable {
     protected int orderID;
     protected long orderDate;
     protected OrderStatus status;
     protected ArrayList<Item> items;
+    protected String sourceFile;
     protected String type;
     @Serial
     private static final long serialVersionUID = 1L;
 
-    //constructor
+    /**
+     * Constructs a new Order.
+     *
+     * @param orderID   unique identifier for this order
+     * @param orderDate timestamp when the order was placed, or 0 if not available
+     * @param items     list of items in the order
+     * @param type      the type of order: "ship", "pickup", or "delivery"
+     */
     public Order(int orderID, long orderDate, ArrayList<Item> items, String type) {
         this.orderID = orderID;
         this.orderDate = orderDate;
@@ -24,35 +33,57 @@ public abstract class Order implements Serializable {
         this.items = items;
         this.type = type;
     }
-    protected String sourceFile;
 
+    /**
+     * Sets the source file this order was imported from.
+     * Feature 3.
+     *
+     * @param sourceFile the name of the XML file this order came from
+     */
     public void setSourceFile(String sourceFile) {
         this.sourceFile = sourceFile;
     }
 
+    /**
+     * Returns the source file this order was imported from.
+     * Returns null if the order was not imported from a file.
+     * Feature 3.
+     *
+     * @return the source file name, or null
+     */
     public String getSourceFile() {
         return sourceFile;
     }
 
-    //getters
-    public int getOrderID(){
-        return orderID;
-    }
+    /** Returns the order ID.
+     * @return order ID */
+    public int getOrderID(){ return orderID; }
+
+    /** Returns the order date, or 0 if not available.
+     * @return order date */
     public long getOrderDate(){
         return orderDate;
     }
+
+    /** Returns the current status of the order.
+     * @return order status */
     public OrderStatus getOrderStatus() {
         return status;
     }
+
+    /** Returns the order type: "ship", "pickup", or "delivery".
+     * @return order type */
     public String getType() {return type; }
+
+    /** Returns the list of items in the order.
+     * @return list of items */
     public ArrayList<Item> getItems() {
         return items;
     }
 
     /**
      * startFulfilling method, returns true if incoming orders need to be started
-     * @return boolean
-     */
+     * @return boolean */
     public boolean startFulfilling() {
         if (status == OrderStatus.INCOMING){
             status = OrderStatus.IN_PROGRESS;
@@ -101,6 +132,8 @@ public abstract class Order implements Serializable {
         return total;
     }
 
+    /** Returns a string describing the order type.
+     * @return type string */
     public String getOrderType(){
         if (type.equalsIgnoreCase("delivery")){
             return "DELIVERY order";
@@ -118,7 +151,9 @@ public abstract class Order implements Serializable {
      */
     public void displayOrder() {
         System.out.println("Order ID: " + orderID);
-        System.out.println("Date: " + orderDate);
+        if (orderDate != 0) {
+            System.out.println("Date: " + orderDate);
+        }
         System.out.println(getOrderType() + " is " + getOrderStatus());
         System.out.println("Items: ");
         for (Item item : items) {

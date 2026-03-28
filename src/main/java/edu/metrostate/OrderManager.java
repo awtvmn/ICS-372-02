@@ -6,13 +6,14 @@ import org.json.simple.JSONObject;
 import java.io.*;
 import java.util.HashMap;
 import java.util.ArrayList;
+import java.util.List;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 /**
- * OrderManager class, used to add, start, display, cancel, complete or incomplete orders,
- * and export orders into a JSON file
+ * OrderManager class, used to add, start, display, cancel, complete or incomplete orders
+ * Returns OrderResult for action methods and export orders into xml file
  */
 public class OrderManager implements Serializable {
 
@@ -29,7 +30,7 @@ public class OrderManager implements Serializable {
      * @param orderDate timestamp of the order
      * @param items     list of items in the order
      */
-    public void addOrder(String type, long orderDate, ArrayList<Item> items) {
+    public OrderResult addOrder(String type, long orderDate, ArrayList<Item> items) {
         Order newOrder;
 
         // checks if it is ship or pickup
@@ -40,15 +41,15 @@ public class OrderManager implements Serializable {
         } else if (type.equals("delivery")) {
             newOrder = new DeliveryOrder(nextOrderID, orderDate, items);
         } else {
-            System.out.println("Unknown order type.");
-            return;
+            return new OrderResult(false,"Unknown order type." + type);
         }
 
 
         // Assigns new order to an ID
-        allOrders.put(nextOrderID, newOrder); //puts it in the hash
-        System.out.println("    Order " + nextOrderID + " added successfully.");
-        nextOrderID++; // increm by 1
+        allOrders.put(nextOrderID, newOrder);
+        int assignedID = nextOrderID;
+        nextOrderID++;
+        return new OrderResult(true, "    Order " + assignedID + " added successfully.");
 
     }
 
@@ -62,9 +63,8 @@ public class OrderManager implements Serializable {
      * @param items      list of items in the order
      * @param sourceFile the name of the file this order came from
      */
-    public void addOrderWithID(int orderID, String type, ArrayList<Item> items, String sourceFile) {
+    public OrderResult addOrderWithID(int orderID, String type, ArrayList<Item> items, String sourceFile) {
         if (allOrders.containsKey(orderID)) {
-            System.out.println("    Order #" + orderID + " already exists, Reassigning to #" + nextOrderID);
             orderID = nextOrderID;
         }
 
@@ -76,8 +76,8 @@ public class OrderManager implements Serializable {
         } else if (type.equals("delivery")) {
             newOrder = new DeliveryOrder(orderID, 0, items);
         } else {
-            System.out.println("    Unknown order type: " + type);
-            return;
+            return new OrderResult(false, "    Skipping order #" + orderID
+                    + ": unknown order type \"" + type + "\" (must be ship, pickup, or delivery).");
         }
 
         newOrder.setSourceFile(sourceFile);
@@ -85,7 +85,7 @@ public class OrderManager implements Serializable {
         allOrders.put(orderID, newOrder);
 
         if (orderID >= nextOrderID) nextOrderID = orderID + 1;
-        System.out.println("    Order #" + orderID + " imported successfully.");
+        return new OrderResult(true, "    Order #" + orderID + " imported successfully.");
     }
 
 
@@ -97,16 +97,15 @@ public class OrderManager implements Serializable {
      *
      * @param orderID the ID of the order to start
      */
-    public void startOrder(int orderID) {
+    public OrderResult startOrder(int orderID) {
         Order order = allOrders.get(orderID); // gets info from hash
         if (order == null) {
-            System.out.println("Order not found.");
-            return;
+            return new OrderResult(false, "Order not found.");
         }
         if (order.startFulfilling()){
-            System.out.println("Order " + orderID + " has started.");
+            return new OrderResult(true, "Order " + orderID + " has started.");
         } else {
-            System.out.println("Order " + orderID + " cannot start. Status: " + order.getOrderStatus());
+            return new OrderResult(false, "Order " + orderID + " cannot start. Status: " + order.getOrderStatus());
         }
 
     }
@@ -132,40 +131,32 @@ public class OrderManager implements Serializable {
      *
      * @param orderID the ID of the order to complete
      */
-    public void completeOrder(int orderID){
+    public OrderResult completeOrder(int orderID){
         Order order = allOrders.get(orderID);
         if (order == null) {
-            System.out.println("Order not found.");
-            return;
+            return new OrderResult(false, "Order not found.");
         }
         if (order.completeOrder()){
-            System.out.println("Order " + orderID + " has been completed.");
+            return new OrderResult(true, "Order " + orderID + " has been completed.");
         } else {
-            System.out.println("Order " + orderID + " cannot be completed. Status: " + order.getOrderStatus());
+            return new OrderResult(false, "Order " + orderID + " cannot be completed. Status: " + order.getOrderStatus());
         }
 
     }
 
     /**
-     * Prints all orders that have not yet been completed.
+     * Returns all orders that have not yet been completed.
      * Requirement 8
+     * @return list of uncompleted orders
      */
-    public void incompleteOrder(){
-        boolean hasUncompletedOrders = false;
-        System.out.println("Uncompleted Orders: ");
-        System.out.println();
-
-        for(Order order : allOrders.values()){
-            if(order.getOrderStatus() != OrderStatus.COMPLETED){
-                displayOrder(order.getOrderID());
-                System.out.println();
-                hasUncompletedOrders = true;
+    public List<Order> getIncompletedOrders() {
+        List<Order> result = new ArrayList<>();
+        for (Order order : allOrders.values()) {
+            if (order.getOrderStatus() != OrderStatus.COMPLETED) {
+                result.add(order);
             }
         }
-
-        if(!hasUncompletedOrders){
-            System.out.println("No uncompleted orders.");
-        }
+        return result;
     }
 
     /**
@@ -174,17 +165,16 @@ public class OrderManager implements Serializable {
      *
      * @param orderID the ID of the order to cancel
      */
-    public void cancelOrder(int orderID){
+    public OrderResult cancelOrder(int orderID){
         Order order = allOrders.get(orderID);
         if(order == null) {
-            System.out.println("Order not found.");
-            return;
+            return new OrderResult(false, "Order not found.");
         }
         if (order.cancelOrder()){
-            System.out.println("Order " + orderID + " has been canceled.");
+            return new OrderResult(true, "Order " + orderID + " has been canceled.");
 
         } else {
-            System.out.println("Order " + orderID + " has been canceled or completed already.");
+            return new OrderResult(false, "Order " + orderID + " cannot be canceled. Status: " + order.getOrderStatus());
         }
     }
 
@@ -203,6 +193,9 @@ public class OrderManager implements Serializable {
      * Requirement 7
      */
     public void exportOrders() {
+        File folder = new File("exported json files");
+        if (!folder.exists()) folder.mkdir();
+
         JSONObject root = new JSONObject();
         JSONArray ordersArray = new JSONArray();
         for (Order order : allOrders.values()){
