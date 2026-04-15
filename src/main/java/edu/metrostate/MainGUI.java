@@ -17,22 +17,40 @@ import javafx.scene.text.TextFlow;
 import javafx.scene.text.Text;
 import java.util.Map;
 import java.util.Optional;
+import java.util.List;
+
 
 /**
  * MainGUI class - Feature 6
  * Provides a graphical interface for the warehouse order system.
- * Users can start, complete, display, cancel, and export orders by clicking buttons.
+ *
+ * Layout overview:
+ * - Top:    Info banner with startup instructions
+ * - Center: Three order columns (Ship, Pickup, Delivery) on the left;
+ *             action buttons, order detail panel, and uncompleted orders panel on the right
+ * - Bottom: Output log for action feedback messages
  */
 public class MainGUI extends Application {
 
     private OrderManager orderManager;
     private Directory directory;
 
-    // list of orders on the left
-    private ObservableList<Order> orderListItems = FXCollections.observableArrayList();
-    private ListView<Order> orderListView = new ListView<>(orderListItems);
+    // List of orders on the left, divided into columns
+    private ObservableList<Order> shipItems     = FXCollections.observableArrayList();
+    private ObservableList<Order> pickupItems   = FXCollections.observableArrayList();
+    private ObservableList<Order> deliveryItems = FXCollections.observableArrayList();
 
-    // bottom text
+    private ListView<Order> shipListView     = new ListView<>(shipItems);
+    private ListView<Order> pickupListView   = new ListView<>(pickupItems);
+    private ListView<Order> deliveryListView = new ListView<>(deliveryItems);
+
+    // Right-side detail panel
+    private VBox detailPanel = new VBox(6);
+
+    // Right-side uncompleted pane
+    private VBox uncompletedPanel = new VBox(6);
+
+    // Bottom output log
     private TextFlow outputArea = new TextFlow();
 
     /**
@@ -69,52 +87,59 @@ public class MainGUI extends Application {
         timeline.setCycleCount(Timeline.INDEFINITE);
         timeline.play();
 
-        orderListView.setCellFactory(listView -> new ListCell<>(){
-            @Override
-            protected void updateItem(Order order, boolean empty) {
-                super.updateItem(order, empty);
-                if (order == null || empty) {
-                    setText(null);
-                    setStyle("");
-                    setGraphic(null);
-                    return;
+        // Each row shows an icon and status
+        for (ListView<Order> lv : List.of(shipListView, pickupListView, deliveryListView)) {
+            lv.setCellFactory(listView -> new ListCell<>() {
+                @Override
+                protected void updateItem(Order order, boolean empty) {
+                    super.updateItem(order, empty);
+                    if (order == null || empty) {
+                        setText(null);
+                        setStyle("");
+                        setGraphic(null);
+                        return;
+                    }
+
+                    String icon;
+                    if (order.getOrderStatus() == OrderStatus.COMPLETED) {
+                        icon = "✅";
+                    } else if (order.getOrderStatus() == OrderStatus.CANCELED) {
+                        icon = "❌";
+                    } else if (order.getOrderStatus() == OrderStatus.IN_PROGRESS) {
+                        icon = "⏳";
+                    } else {
+                        icon = "📦";
+                    }
+
+                    setText(icon + "Order #" + order.getOrderID()
+                            + " | " + order.getOrderStatus());
+
+                    String color;
+                    if (order.getOrderStatus() == OrderStatus.CANCELED) {
+                        color = "gray";
+                    } else if (order.getOrderStatus() == OrderStatus.COMPLETED) {
+                        color = "green";
+                    } else if (order.getOrderStatus() == OrderStatus.IN_PROGRESS) {
+                        color = "blue";
+                    } else {
+                        color = "black";
+                    }
+
+                    setStyle("-fx-text-fill: " + color + "; -fx-font-weight: bold;");
                 }
+            });
+        }
 
-                String icon;
-                if (order.getOrderStatus() == OrderStatus.COMPLETED) {
-                    icon = "✅";
-                } else if (order.getType().equalsIgnoreCase("delivery")) {
-                    icon = "🚗";
-                } else if (order.getType().equalsIgnoreCase("ship")) {
-                    icon = "🛫";
-                } else {
-                    icon = "🛒";
-                }
 
-                setText(icon + "Order #" + order.getOrderID()
-                        + " | " + order.getType()
-                        + " | " + order.getOrderStatus());
+        // Each column has a colored header and shows only its order type
+        VBox shipCol     = makeOrderColumn("🛫  Ship",     shipListView,     "#dbeeff", "#1a5fa8");
+        VBox pickupCol   = makeOrderColumn("🛒  Pickup",   pickupListView,   "#fff3e0", "#a05a00");
+        VBox deliveryCol = makeOrderColumn("🚗  Delivery", deliveryListView, "#fde8e8", "#9b2020");
 
-                String color;
-                if(order.getOrderStatus() == OrderStatus.CANCELED){
-                    color = "gray";
-                } else if(order.getOrderStatus() == OrderStatus.COMPLETED){
-                    color = "green";
-                } else if (order.getType().equalsIgnoreCase("delivery")){
-                    color = "red";
-                } else if (order.getType().equalsIgnoreCase("ship")){
-                    color = "blue";
-                } else {
-                    color = "orange";
-                }
-
-                setStyle("-fx-text-fill: " + color + "; -fx-font-weight: bold;");
-            }
-        });
-
-        // left side - order list
-        orderListView.setPrefWidth(300);
-        VBox leftPanel = new VBox(5, new Label("Orders:"), orderListView);
+        HBox orderColumns = new HBox(8, shipCol, pickupCol, deliveryCol);
+        HBox.setHgrow(shipCol,     Priority.ALWAYS);
+        HBox.setHgrow(pickupCol,   Priority.ALWAYS);
+        HBox.setHgrow(deliveryCol, Priority.ALWAYS);
 
         // right side - buttons
         Button btnStart      = new Button("Start Order");
@@ -141,10 +166,35 @@ public class MainGUI extends Application {
                 btnExport,
                 new Separator()
         );
-        buttonPanel.setPrefWidth(180);
-        buttonPanel.setPadding(new Insets(0, 0, 0, 10));
+        // Detail panel setup - shows info for the selected order
+        Label detailHeader = new Label("Order Details");
+        detailHeader.setStyle("-fx-font-weight: bold; -fx-font-size: 13px;");
+        detailPanel.getChildren().add(new Label("Select an order and click Display."));
+        detailPanel.setStyle(
+                "-fx-border-color: #cccccc;" +
+                        "-fx-border-radius: 6;" +
+                        "-fx-border-width: 1;" +
+                        "-fx-padding: 10;"
+        );
+        VBox.setVgrow(detailPanel, Priority.ALWAYS);
 
+        // Uncompleted orders panel setup - lists all uncompleted orders
+        Label uncompletedHeader = new Label("Uncompleted Orders");
+        uncompletedHeader.setStyle("-fx-font-weight: bold; -fx-font-size: 13px;");
+        uncompletedPanel.getChildren().add(new Label("Click 'Show Uncompleted\nOrders' to view."));
+        uncompletedPanel.setStyle(
+                "-fx-border-color: #cccccc;" +
+                        "-fx-border-radius: 6;" +
+                        "-fx-border-width: 1;" +
+                        "-fx-padding: 10;"
+        );
+        VBox.setVgrow(uncompletedPanel, Priority.ALWAYS);
 
+        // Right panel = buttons on top, detail panel below
+        VBox rightPanel = new VBox(10, buttonPanel, detailHeader, detailPanel, uncompletedHeader, uncompletedPanel);
+        rightPanel.setPrefWidth(220);
+        rightPanel.setMinWidth(220);
+        rightPanel.setPadding(new Insets(0, 0, 0, 10));
 
         // bottom - output messages
         ScrollPane scrollPane = new ScrollPane(outputArea);
@@ -162,33 +212,84 @@ public class MainGUI extends Application {
         btnUncompleted.setOnAction(e -> handleShowUncompleted());
         btnExport.setOnAction(e -> handleExport());
 
+        // Info banner on top - tells users how to get started
+        Label infoBanner = new Label(
+                "System ready!  |  Drop order files into the \"watched\" folder  |  " +
+                        "Auto-imports every 3 seconds  |  To reset: delete \"allOrders.dat\" & \"importedFiles.dat\""
+        );
+        infoBanner.setMaxWidth(Double.MAX_VALUE);
+        infoBanner.setWrapText(true);
+        infoBanner.setStyle(
+                "-fx-background-color: #dbeeff;" +
+                        "-fx-text-fill: #1a5fa8;" +
+                        "-fx-font-size: 12px;" +
+                        "-fx-font-weight: bold;" +
+                        "-fx-padding: 8 12 8 12;" +
+                        "-fx-background-radius: 6;"
+        );
+
         // put it all together
-        HBox centerPanel = new HBox(leftPanel, buttonPanel);
-        VBox root = new VBox(10, centerPanel, new Label("Output:"), scrollPane);
+        HBox centerPanel = new HBox(orderColumns, rightPanel);
+        HBox.setHgrow(orderColumns, Priority.ALWAYS);
+        VBox root = new VBox(10, infoBanner, centerPanel, new Label("Output:"), scrollPane);
         root.setPadding(new Insets(15));
 
         // show the window
         primaryStage.setTitle("Warehouse Order System");
-        primaryStage.setScene(new Scene(root, 520, 500));
+        primaryStage.setScene(new Scene(root, 1000, 800));
         primaryStage.show();
+        primaryStage.setMinWidth(1000);
+        primaryStage.setMinHeight(800);
 
         refreshOrderList();
-        log("System ready. Please drag and drop your order file in \"watched\" folder.\nSystem will import any new files added into the folder every 3 seconds.");
-        log("To reset your order, please close your application, delete \"allOrders.dat\" and \"importedFiles.dat\" and reopen.");
     }
 
     /**
-     * Helper - gets the currently selected order from the list view.
+     * Helper - checks all three list views for a selected order.
      * Logs a prompt message and returns null if nothing is selected.
      *
      * @return the selected Order, or null if none is selected
      */
     private Order getSelectedOrder() {
-        Order selected = orderListView.getSelectionModel().getSelectedItem();
-        if (selected == null) {
-            log("Please select an order from the list first.");
+        for (ListView<Order> lv : List.of(shipListView, pickupListView, deliveryListView)) {
+            Order selected = lv.getSelectionModel().getSelectedItem();
+            if (selected != null) return selected;
         }
-        return selected;
+        log("Please select an order from the list first.");
+        return null;
+    }
+
+    /**
+     * Builds a labeled column with a colored header for one order type.
+     *
+     * @param title      the column header text (e.g. "🛫  Ship")
+     * @param listView   the ListView to embed in the column
+     * @param headerBg   background color for the header
+     * @param headerText text color for the header
+     * @return a VBox containing the styled header and list
+     */
+
+    private VBox makeOrderColumn(String title, ListView<Order> listView,
+                                 String headerBg, String headerText) {
+        Label header = new Label(title);
+        header.setMaxWidth(Double.MAX_VALUE);
+        header.setPadding(new Insets(6, 10, 6, 10));
+        header.setStyle(
+                "-fx-font-weight: bold;" +
+                        "-fx-font-size: 13px;" +
+                        "-fx-background-color: " + headerBg + ";" +
+                        "-fx-text-fill: " + headerText + ";" +
+                        "-fx-background-radius: 6 6 0 0;"
+        );
+        listView.setPrefHeight(280);
+        VBox col = new VBox(0, header, listView);
+        VBox.setVgrow(listView, Priority.ALWAYS);
+        col.setStyle(
+                "-fx-border-color: #cccccc;" +
+                        "-fx-border-radius: 6;" +
+                        "-fx-border-width: 1;"
+        );
+        return col;
     }
 
     /**
@@ -225,7 +326,7 @@ public class MainGUI extends Application {
         OrderStatus statusBefore = orderManager.getAllOrders().get(orderID).getOrderStatus();
         orderManager.completeOrder(orderID);
         if(statusBefore == OrderStatus.CANCELED) {
-            log("Order #" + orderID + " has been canceled. Cancelled orders cannot be completed.");
+            log("Order #" + orderID + " has been canceled. Canceled orders cannot be completed.");
         } else if (statusBefore == OrderStatus.COMPLETED) {
             log("Order #" + orderID + " is already completed.", Color.RED);
         } else if (statusBefore == OrderStatus.INCOMING) {
@@ -254,35 +355,56 @@ public class MainGUI extends Application {
             return;
         }
 
-        String typeIcon;
-        if(order.getType().equalsIgnoreCase("delivery")){
-            typeIcon = "🚗";
-        } else if (order.getType().equalsIgnoreCase("ship")){
-            typeIcon = "🛫";
-        } else {
-            typeIcon = "🛒";
-        }
+        detailPanel.getChildren().clear();
 
-        log("---Order Details---");
-        log("Order ID: " + order.getOrderID());
-        if (order.getOrderDate() != 0) {
-            log("Order Date: " + order.getOrderDate());}
-        log("Order Status: " + order.getOrderStatus(),
-                order.getOrderStatus() == OrderStatus.COMPLETED ? Color.GREEN : Color.PURPLE);
-        log(typeIcon + "Order Type: " + order.getType(),
-                order.getType().equalsIgnoreCase("delivery") ? Color.RED :
-                        order.getType().equalsIgnoreCase("ship") ? Color.BLUE : Color.ORANGE);
+        String typeIcon = order.getType().equalsIgnoreCase("delivery") ? "🚗"
+                : order.getType().equalsIgnoreCase("ship") ? "🛫" : "🛒";
+        String typeColor = order.getType().equalsIgnoreCase("delivery") ? "#9b2020"
+                : order.getType().equalsIgnoreCase("ship") ? "#1a5fa8" : "#a05a00";
+        String typeBg = order.getType().equalsIgnoreCase("delivery") ? "#fde8e8"
+                : order.getType().equalsIgnoreCase("ship") ? "#dbeeff" : "#fff3e0";
 
-        if (order.getSourceFile() != null) {
-            log("Source File: " + order.getSourceFile());
-        }
+        Label header = new Label(typeIcon + " Order #" + order.getOrderID() + " — " + order.getType());
+        header.setStyle("-fx-font-weight: bold; -fx-font-size: 13px;" +
+                "-fx-text-fill: " + typeColor + ";" +
+                "-fx-background-color: " + typeBg + ";" +
+                "-fx-padding: 6 10 6 10; -fx-background-radius: 4;");
+        header.setMaxWidth(Double.MAX_VALUE);
 
-        log("Items: ");
-        for(Item item : order.getItems()){
-            log("\t" + item.getName()
-                    + "(Quantity: " + item.getQuantity()
-                    + ", Price: $" + item.getPrice() + ")");
+        detailPanel.getChildren().add(header);
+        detailPanel.getChildren().add(makeDetailRow("Status", order.getOrderStatus().toString()));
+        if (order.getOrderDate() != 0)
+            detailPanel.getChildren().add(makeDetailRow("Date", String.valueOf(order.getOrderDate())));
+        if (order.getSourceFile() != null)
+            detailPanel.getChildren().add(makeDetailRow("Source", order.getSourceFile()));
+
+        Label itemsLabel = new Label("Items:");
+        itemsLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 12px;");
+        detailPanel.getChildren().add(itemsLabel);
+
+        for (Item item : order.getItems()) {
+            Label itemLine = new Label("  • " + item.getName()
+                    + " (x" + item.getQuantity() + ") — $" + item.getPrice());
+            itemLine.setStyle("-fx-font-size: 12px;");
+            detailPanel.getChildren().add(itemLine);
         }
+    }
+
+    /**
+     * Builds a label-value row for the detail panel.
+     *
+     * @param label the field name (e.g. "Status")
+     * @param value the field value (e.g. "IN_PROGRESS")
+     * @return an HBox containing the styled label and value
+     */
+    private HBox makeDetailRow(String label, String value) {
+        Label l = new Label(label + ":");
+        l.setStyle("-fx-text-fill: gray; -fx-font-size: 12px;");
+        l.setPrefWidth(60);
+        Label v = new Label(value);
+        v.setStyle("-fx-font-weight: bold; -fx-font-size: 12px;");
+        v.setWrapText(true);
+        return new HBox(8, l, v);
     }
 
     /**
@@ -328,17 +450,27 @@ public class MainGUI extends Application {
      * Shows all uncompleted orders in the output log.
      */
     private void handleShowUncompleted() {
-        log("--- Uncompleted Orders ---");
+        uncompletedPanel.getChildren().clear();
+
         boolean found = false;
+        int count = 1;
         for (Map.Entry<Integer, Order> entry : orderManager.getAllOrders().entrySet()) {
             Order order = entry.getValue();
             if (order.getOrderStatus() != OrderStatus.COMPLETED) {
-                log("Order #" + order.getOrderID() + " | " + order.getType()
-                        + " | " + order.getOrderStatus());
+                String icon = order.getOrderStatus() == OrderStatus.CANCELED ? "❌"
+                        : order.getOrderStatus() == OrderStatus.IN_PROGRESS ? "⏳" : "📦";
+                Label entryLabel = new Label(count + ". " + icon + " Order #" + order.getOrderID());
+                entryLabel.setStyle("-fx-font-size: 12px; -fx-font-weight: bold;");
+                entryLabel.setWrapText(true);
+                uncompletedPanel.getChildren().add(entryLabel);
+                count++;
                 found = true;
             }
         }
-        if (!found) log("No uncompleted orders.");
+
+        if (!found) {
+            uncompletedPanel.getChildren().add(new Label("No uncompleted orders."));
+        }
     }
 
     /**
@@ -346,16 +478,23 @@ public class MainGUI extends Application {
      */
     private void handleExport() {
         orderManager.exportXML();
-        log("Orders exported successfully.\nAll exported orders are in exported xml files");
+        log("Orders exported successfully. All exported orders are in \"exported xml files\" folder.");
     }
 
     /**
      * Updates the order list on the left side of the window
      */
     private void refreshOrderList() {
-        orderListItems.clear();
+        shipItems.clear();
+        pickupItems.clear();
+        deliveryItems.clear();
         for (Map.Entry<Integer, Order> entry : orderManager.getAllOrders().entrySet()) {
-            orderListItems.add(entry.getValue());
+            Order order = entry.getValue();
+            switch (order.getType().toLowerCase()) {
+                case "ship"     -> shipItems.add(order);
+                case "pickup"   -> pickupItems.add(order);
+                case "delivery" -> deliveryItems.add(order);
+            }
         }
     }
 
