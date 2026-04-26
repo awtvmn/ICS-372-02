@@ -464,15 +464,17 @@ public class MainGUI extends Application {
     }
 
     /**
-     * Exports all orders to a JSON file
+     * Exports all orders to a JSON and XML file
      */
     private void handleExport() {
+        orderManager.exportXML();
+        orderManager.exportJSON();
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Export Successful");
         alert.setHeaderText("Orders exported successfully.");
-        alert.setContentText("All orders have been saved to the \"exported xml files\" folder.");
+        alert.setContentText("All orders have been saved to the \"exported xml files\" and \"exported json files\" folder.");
         alert.showAndWait();
-        log("Orders exported successfully. All exported orders are in the \"exported xml files\" folder.");
+        log("Orders exported successfully. All exported orders are in the \"exported xml files\" and \"exported json files\" folder.");
     }
 
     /**

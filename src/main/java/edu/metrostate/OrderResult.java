@@ -2,7 +2,7 @@ package edu.metrostate;
 
 /**
  * OrderResult class - stores the result of an OrderManager action.
- * Contains whether the action succeeded and a message describing what happened.
+ * Contains a message describing what happened.
  */
 public class OrderResult {
     private final boolean success;
@@ -17,12 +17,6 @@ public class OrderResult {
         this.success = success;
         this.message = message;
     }
-
-    /**
-     * Returns true if the operation succeeded.
-     * @return boolean success
-     */
-    public boolean isSuccess() { return success; }
 
     /**
      * Returns the message describing the outcome.

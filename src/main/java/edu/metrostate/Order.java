@@ -38,7 +38,7 @@ public abstract class Order implements Serializable {
      * Sets the source file this order was imported from.
      * Feature 3.
      *
-     * @param sourceFile the name of the XML file this order came from
+     * @param sourceFile the name of the XML or JSON file this order came from
      */
     public void setSourceFile(String sourceFile) {
         this.sourceFile = sourceFile;
@@ -94,7 +94,6 @@ public abstract class Order implements Serializable {
 
     /**
      * cancelOrder method, returns true if order has been canceled
-     * feature 1
      * @return boolean
      */
     public boolean cancelOrder() {
@@ -131,42 +130,4 @@ public abstract class Order implements Serializable {
         }
         return total;
     }
-
-    /** Returns a string describing the order type.
-     * @return type string */
-    public String getOrderType(){
-        if (type.equalsIgnoreCase("delivery")){
-            return "DELIVERY order";
-        }else if (type.equalsIgnoreCase("ship")){
-            return "SHIP order";
-        }else if (type.equalsIgnoreCase("pickup")){
-            return "PICKUP order";
-        } else{
-            return type.toUpperCase();
-        }
-    }
-
-    /**
-     * displayOrder method, prints out an order's id, type, date, status, and items
-     */
-    public void displayOrder() {
-        System.out.println("Order ID: " + orderID);
-        if (orderDate != 0) {
-            System.out.println("Date: " + orderDate);
-        }
-        System.out.println(getOrderType() + " is " + getOrderStatus());
-        System.out.println("Items: ");
-        for (Item item : items) {
-            System.out.printf("%s (Qty: %d, Price: $%.2f)\n", item.getName(), item.getQuantity(), item.getPrice());
-        }
-        System.out.printf("Total  Price: $%.2f\n", getTotalPrice());
-    }
-
-    /**
-     * add method, adds item objects into an array for an order
-     * @param item item
-     */
-    public void add(Item item){
-        items.add(item);
-     }
 }

@@ -6,14 +6,13 @@ import org.json.simple.JSONObject;
 import java.io.*;
 import java.util.HashMap;
 import java.util.ArrayList;
-import java.util.List;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 /**
- * OrderManager class, used to add, start, display, cancel, complete or incomplete orders
- * Returns OrderResult for action methods and export orders into xml file
+ * OrderManager class, used to add, start, cancel, complete or incomplete orders
+ * Returns OrderResult for action methods and export orders into xml file and json file
  */
 public class OrderManager implements Serializable {
 
@@ -24,7 +23,6 @@ public class OrderManager implements Serializable {
 
     /**
      * Adds a new order of the given type to the system.
-     * Requirement 2 and 3.
      *
      * @param type      "ship", "pickup", or "delivery"
      * @param orderDate timestamp of the order
@@ -54,11 +52,10 @@ public class OrderManager implements Serializable {
     }
 
     /**
-     * Adds a new order using the order ID from imported XML file.
+     * Adds a new order using the order ID from imported XML and JSON file.
      * If the ID already exists, reassigns a new ID so no order is lost.
-     * Feature 3.
      *
-     * @param orderID    the order ID from the XML file
+     * @param orderID    the order ID from the XML or JSON file
      * @param type       "ship", "pickup", or "delivery"
      * @param items      list of items in the order
      * @param sourceFile the name of the file this order came from
@@ -93,7 +90,6 @@ public class OrderManager implements Serializable {
 
     /**
      * Starts fulfilling order, moving it from INCOMING to IN_PROGRESS.
-     * Requirement 4
      *
      * @param orderID the ID of the order to start
      */
@@ -111,23 +107,7 @@ public class OrderManager implements Serializable {
     }
 
     /**
-     * Displays the details of an order
-     * Requirement 4
-     *
-     * @param orderID the ID of the order to display
-     */
-    public void displayOrder(int orderID){
-        Order order = allOrders.get(orderID); // gets info from hash
-        if (order == null) {
-            System.out.println("Order not found.");
-            return;
-        }
-        order.displayOrder();
-    }
-
-    /**
      * Completes an order, moving it from IN_PROGRESS to COMPLETED.
-     * Requirement 4
      *
      * @param orderID the ID of the order to complete
      */
@@ -144,20 +124,6 @@ public class OrderManager implements Serializable {
 
     }
 
-    /**
-     * Returns all orders that have not yet been completed.
-     * Requirement 8
-     * @return list of uncompleted orders
-     */
-    public List<Order> getIncompletedOrders() {
-        List<Order> result = new ArrayList<>();
-        for (Order order : allOrders.values()) {
-            if (order.getOrderStatus() != OrderStatus.COMPLETED) {
-                result.add(order);
-            }
-        }
-        return result;
-    }
 
     /**
      * Cancels an order if it is INCOMING or IN_PROGRESS.
@@ -190,9 +156,8 @@ public class OrderManager implements Serializable {
 
     /**
      * Exports all orders to a JSON file called "exported json files"
-     * Requirement 7
      */
-    public void exportOrders() {
+    public void exportJSON() {
         File folder = new File("exported json files");
         if (!folder.exists()) folder.mkdir();
 
