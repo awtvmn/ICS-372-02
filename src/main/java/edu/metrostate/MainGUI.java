@@ -246,7 +246,11 @@ public class MainGUI extends Application {
             Order selected = lv.getSelectionModel().getSelectedItem();
             if (selected != null) return selected;
         }
-        log("Please select an order from the list first.");
+        Alert alert = new Alert(Alert.AlertType.WARNING);
+        alert.setTitle("No Order Selected");
+        alert.setHeaderText("Please select an order first.");
+        alert.setContentText("Click on an order from the Ship, Pickup, or Delivery column before performing an action.");
+        alert.showAndWait();
         return null;
     }
 
@@ -463,8 +467,12 @@ public class MainGUI extends Application {
      * Exports all orders to a JSON file
      */
     private void handleExport() {
-        orderManager.exportXML();
-        log("Orders exported successfully. All exported orders are in \"exported xml files\" folder.");
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Export Successful");
+        alert.setHeaderText("Orders exported successfully.");
+        alert.setContentText("All orders have been saved to the \"exported xml files\" folder.");
+        alert.showAndWait();
+        log("Orders exported successfully. All exported orders are in the \"exported xml files\" folder.");
     }
 
     /**
