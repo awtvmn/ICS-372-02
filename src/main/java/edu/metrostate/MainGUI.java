@@ -27,7 +27,7 @@ import java.util.List;
  * Layout overview:
  * - Top:    Info banner with startup instructions
  * - Center: Three order columns (Ship, Pickup, Delivery) on the left;
- *             action buttons, order detail panel, and uncompleted orders panel on the right
+ *             action buttons, order detail panel on the right
  * - Bottom: Output log for action feedback messages
  */
 public class MainGUI extends Application {
@@ -47,8 +47,11 @@ public class MainGUI extends Application {
     // Right-side detail panel
     private VBox detailPanel = new VBox(6);
 
-    // Right-side uncompleted pane
-    private VBox uncompletedPanel = new VBox(6);
+    // Tracks whether the uncompleted filter is currently active
+    private boolean showingUncompleted = false;
+
+    // The toggle button (kept as a field so we can update its text)
+    private Button btnUncompleted = new Button("Show Uncompleted Orders");
 
     // Bottom output log
     private TextFlow outputArea = new TextFlow();
@@ -146,7 +149,6 @@ public class MainGUI extends Application {
         Button btnComplete   = new Button("Complete Order");
         Button btnDisplay    = new Button("Display Order");
         Button btnCancel     = new Button("Cancel Order");
-        Button btnUncompleted = new Button("Show Uncompleted Orders");
         Button btnExport     = new Button("Export All Orders");
 
         // make all buttons same width
@@ -178,20 +180,9 @@ public class MainGUI extends Application {
         );
         VBox.setVgrow(detailPanel, Priority.ALWAYS);
 
-        // Uncompleted orders panel setup - lists all uncompleted orders
-        Label uncompletedHeader = new Label("Uncompleted Orders");
-        uncompletedHeader.setStyle("-fx-font-weight: bold; -fx-font-size: 13px;");
-        uncompletedPanel.getChildren().add(new Label("Click 'Show Uncompleted\nOrders' to view."));
-        uncompletedPanel.setStyle(
-                "-fx-border-color: #cccccc;" +
-                        "-fx-border-radius: 6;" +
-                        "-fx-border-width: 1;" +
-                        "-fx-padding: 10;"
-        );
-        VBox.setVgrow(uncompletedPanel, Priority.ALWAYS);
 
         // Right panel = buttons on top, detail panel below
-        VBox rightPanel = new VBox(10, buttonPanel, detailHeader, detailPanel, uncompletedHeader, uncompletedPanel);
+        VBox rightPanel = new VBox(10, buttonPanel, detailHeader, detailPanel);
         rightPanel.setPrefWidth(220);
         rightPanel.setMinWidth(220);
         rightPanel.setPadding(new Insets(0, 0, 0, 10));
@@ -209,7 +200,7 @@ public class MainGUI extends Application {
         btnComplete.setOnAction(e -> handleComplete());
         btnDisplay.setOnAction(e -> handleDisplay());
         btnCancel.setOnAction(e -> handleCancel());
-        btnUncompleted.setOnAction(e -> handleShowUncompleted());
+        btnUncompleted.setOnAction(e -> handleToggleUncompleted());
         btnExport.setOnAction(e -> handleExport());
 
         // Info banner on top - tells users how to get started
@@ -447,30 +438,25 @@ public class MainGUI extends Application {
 
 
     /**
-     * Shows all uncompleted orders in the output log.
+     * Handles "Show Uncompleted Orders" / "Show All Orders" toggle.
+     * When active, hides completed orders from all three columns.
+     * When inactive, shows all orders again.
+     * Button text updates to reflect the current state.
      */
-    private void handleShowUncompleted() {
-        uncompletedPanel.getChildren().clear();
+    private void handleToggleUncompleted() {
+        showingUncompleted = !showingUncompleted;
 
-        boolean found = false;
-        int count = 1;
-        for (Map.Entry<Integer, Order> entry : orderManager.getAllOrders().entrySet()) {
-            Order order = entry.getValue();
-            if (order.getOrderStatus() != OrderStatus.COMPLETED) {
-                String icon = order.getOrderStatus() == OrderStatus.CANCELED ? "❌"
-                        : order.getOrderStatus() == OrderStatus.IN_PROGRESS ? "⏳" : "📦";
-                Label entryLabel = new Label(count + ". " + icon + " Order #" + order.getOrderID());
-                entryLabel.setStyle("-fx-font-size: 12px; -fx-font-weight: bold;");
-                entryLabel.setWrapText(true);
-                uncompletedPanel.getChildren().add(entryLabel);
-                count++;
-                found = true;
-            }
+        if (showingUncompleted) {
+            btnUncompleted.setText("Show All Orders");
+            btnUncompleted.setStyle("-fx-font-weight: bold; -fx-text-fill: #9b2020;");
+            log("Showing uncompleted orders only.", Color.RED);
+        } else {
+            btnUncompleted.setText("Show Uncompleted Orders");
+            btnUncompleted.setStyle("");
+            log("Showing all orders.");
         }
 
-        if (!found) {
-            uncompletedPanel.getChildren().add(new Label("No uncompleted orders."));
-        }
+        refreshOrderList();
     }
 
     /**
@@ -490,6 +476,7 @@ public class MainGUI extends Application {
         deliveryItems.clear();
         for (Map.Entry<Integer, Order> entry : orderManager.getAllOrders().entrySet()) {
             Order order = entry.getValue();
+            if (showingUncompleted && order.getOrderStatus() == OrderStatus.COMPLETED) continue;
             switch (order.getType().toLowerCase()) {
                 case "ship"     -> shipItems.add(order);
                 case "pickup"   -> pickupItems.add(order);
