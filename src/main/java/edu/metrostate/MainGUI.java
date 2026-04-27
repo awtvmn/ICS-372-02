@@ -56,6 +56,9 @@ public class MainGUI extends Application {
     // Bottom output log
     private TextFlow outputArea = new TextFlow();
 
+    //undo feature
+    private UndoManager undoManager = new UndoManager();
+
     /**
      * init - if program has loaded before, loads progress from before
      * feature 2
@@ -172,10 +175,11 @@ public class MainGUI extends Application {
         Button btnDisplay    = new Button("Display Order");
         Button btnCancel     = new Button("Cancel Order");
         Button btnExport     = new Button("Export All Orders");
+        Button btnUndo       = new Button("Undo Last Action");
 
         // make all buttons same width
         for (Button b : new Button[]{btnStart, btnComplete,
-                btnDisplay, btnCancel, btnUncompleted, btnExport}) {
+                btnDisplay, btnCancel, btnUndo, btnUncompleted, btnExport}) {
             b.setMaxWidth(Double.MAX_VALUE);
         }
 
@@ -185,6 +189,7 @@ public class MainGUI extends Application {
                 btnComplete,
                 btnDisplay,
                 btnCancel,
+                btnUndo,
                 new Separator(),
                 btnUncompleted,
                 btnExport,
@@ -222,6 +227,7 @@ public class MainGUI extends Application {
         btnComplete.setOnAction(e -> handleComplete());
         btnDisplay.setOnAction(e -> handleDisplay());
         btnCancel.setOnAction(e -> handleCancel());
+        btnUndo.setOnAction(e -> handleUndo());
         btnUncompleted.setOnAction(e -> handleToggleUncompleted());
         btnExport.setOnAction(e -> handleExport());
 
@@ -317,8 +323,13 @@ public class MainGUI extends Application {
         if (selected == null) return;
 
         int orderID = selected.getOrderID();
-        OrderStatus statusBefore = orderManager.getAllOrders().get(orderID).getOrderStatus();
+        Order order = orderManager.getAllOrders().get(orderID);
+        if(order == null) return;
+        undoManager.saveState(order);
+        OrderStatus statusBefore = order.getOrderStatus();
         orderManager.startOrder(orderID);
+
+
         if(statusBefore == OrderStatus.CANCELED) {
             log("Order #" + orderID + " cannot be started. It has been canceled.");
         } else if (statusBefore == OrderStatus.IN_PROGRESS) {
@@ -342,8 +353,13 @@ public class MainGUI extends Application {
         if (selected == null) return;
 
         int orderID = selected.getOrderID();
+        Order order = orderManager.getAllOrders().get(orderID);
+        if(order == null) return;
+
+        undoManager.saveState(order);
         OrderStatus statusBefore = orderManager.getAllOrders().get(orderID).getOrderStatus();
         orderManager.completeOrder(orderID);
+
         if(statusBefore == OrderStatus.CANCELED) {
             log("Order #" + orderID + " has been canceled. Canceled orders cannot be completed.");
         } else if (statusBefore == OrderStatus.COMPLETED) {
@@ -451,7 +467,10 @@ public class MainGUI extends Application {
         if (selected == null) return;
 
         int orderID = selected.getOrderID();
-        OrderStatus statusBefore = orderManager.getAllOrders().get(orderID).getOrderStatus();
+        Order order = orderManager.getAllOrders().get(orderID);
+        if (order == null) return;
+
+        OrderStatus statusBefore = order.getOrderStatus();
         if(statusBefore == OrderStatus.COMPLETED) {
             log("Order #" + orderID + " has been completed and can no longer be canceled.");
             return;
@@ -466,14 +485,16 @@ public class MainGUI extends Application {
 
             // Handle the reason
             if (reason.isPresent() && !reason.get().trim().isEmpty()) {
+
+                undoManager.saveState(orderManager.getAllOrders().get(orderID));
                 orderManager.cancelOrder(orderID);
                 if (statusBefore == OrderStatus.IN_PROGRESS) {
                     String cancelTime = new java.text.SimpleDateFormat("MM/dd/yyyy HH:mm:ss")
-                            .format(new java.util.Date(orderManager.getAllOrders().get(orderID).getCanceledAt()));
+                            .format(new java.util.Date(order.getCanceledAt()));
                     log("Order #" + orderID + " has stopped being fulfilled and been canceled at " + cancelTime + ". Reason: " + reason.get());
                 } else {
                     String cancelTime = new java.text.SimpleDateFormat("MM/dd/yyyy HH:mm:ss")
-                            .format(new java.util.Date(orderManager.getAllOrders().get(orderID).getCanceledAt()));
+                            .format(new java.util.Date(order.getCanceledAt()));
                     log("Order #" + orderID + " is canceled at " + cancelTime + ". Reason: " + reason.get());
                 }
             } else {
@@ -519,6 +540,19 @@ public class MainGUI extends Application {
         alert.setContentText("All orders have been saved to the \"exported xml files\" and \"exported json files\" folder.");
         alert.showAndWait();
         log("Orders exported successfully. All exported orders are in the \"exported xml files\" and \"exported json files\" folder.");
+    }
+
+    /**
+     * Undo last action for order
+     */
+    private void handleUndo(){
+        boolean success = undoManager.undo(orderManager);
+        if(success){
+            log("Undo Successful.", Color.GREEN);
+        }else{
+            log("Nothing to undo.", Color.RED);
+        }
+        refreshOrderList();
     }
 
     /**

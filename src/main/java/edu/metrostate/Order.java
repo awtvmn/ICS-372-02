@@ -146,4 +146,21 @@ public abstract class Order implements Serializable {
         }
         return total;
     }
+
+    public void setOrderStatus(OrderStatus status) {
+        this.status = status;
+    }
+
+    public void setStartedAt(long startedAt){
+        this.startedAt = startedAt;
+    }
+
+    public void setCompletedAt(long completedAt){
+        this.completedAt = completedAt;
+    }
+
+    public void setCanceledAt(long canceledAt){
+        this.canceledAt = canceledAt;
+    }
+
 }
