@@ -19,23 +19,24 @@ public class DirectoryTest {
     @BeforeEach
     void setUp() {
         new File("importedFiles.dat").delete();
+        new File("allOrders.dat").delete();
         orderManager = new OrderManager();
-        directory = new Directory(orderManager);
+        directory = new Directory(orderManager, "watched_test");
     }
 
     @AfterEach
     void tearDown() {
         new File("importedFiles.dat").delete();
-        File folder = new File("watched");
-        if (folder.exists()) {
-            for (File f : folder.listFiles()) {
-                if (f.getName().startsWith("test_")) f.delete();
-            }
+        new File("allOrders.dat").delete();
+        File folder = new File("watched_test");
+        if (folder.exists() && folder.listFiles() != null) {
+            for (File f : folder.listFiles()) f.delete();
         }
+        folder.delete();
     }
 
     private File writeXML(String fileName, String content) throws IOException {
-        File folder = new File("watched");
+        File folder = new File("watched_test");
         folder.mkdirs();
         File file = new File(folder, fileName);
         try (FileWriter fw = new FileWriter(file)) {

@@ -9,7 +9,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
     /**
      * Unit tests for the OrderManager class.
-     * a
+     * Covers adding, starting, completing, canceling, exporting, and persisting orders.
      */
     public class OrderManagerTest {
 
@@ -26,9 +26,11 @@ import static org.junit.jupiter.api.Assertions.*;
         void tearDown() {
             new File("allOrders.dat").delete();
             File jsonFolder = new File("exported json files");
-            if (jsonFolder.exists()) for (File f : jsonFolder.listFiles()) f.delete();
+            if (jsonFolder.exists() && jsonFolder.listFiles() != null)
+                for (File f : jsonFolder.listFiles()) f.delete();
             File xmlFolder = new File("exported xml files");
-            if (xmlFolder.exists()) for (File f : xmlFolder.listFiles()) f.delete();
+            if (xmlFolder.exists() && xmlFolder.listFiles() != null)
+                for (File f : xmlFolder.listFiles()) f.delete();
         }
 
         private ArrayList<Item> createSampleItems() {
@@ -109,10 +111,10 @@ import static org.junit.jupiter.api.Assertions.*;
         }
 
         @Test
-        void exportOrdersCreatesJsonFile() throws IOException {
+        void exportJSONCreatesJsonFile() throws IOException {
             ArrayList<Item> items = createSampleItems();
             orderManager.addOrder("ship", 0, items);
-            orderManager.exportOrders();
+            orderManager.exportJSON();
 
             File jsonFile = new File("exported json files/all-orders.json");
             assertTrue(jsonFile.exists());

@@ -10,7 +10,7 @@ import java.util.ArrayList;
  *
  */
 public class Directory implements Serializable {
-    private static final String watchFolder = "watched";
+    private final String watchFolder;
     private final OrderManager orderManager;
     private ArrayList<String> importedFiles;
     @Serial
@@ -18,6 +18,15 @@ public class Directory implements Serializable {
 
     private Runnable onOrderImported;
 
+    /**
+     * Constructs a Directory watcher using the default "watched/" folder.
+     * Used by the main application.
+     *
+     * @param orderManager the OrderManager to pass to OrderImporter when importing files
+     */
+    public Directory(OrderManager orderManager) {
+        this(orderManager, "watched");
+    }
 
     /**
      * Constructs a Directory watcher.
@@ -26,7 +35,8 @@ public class Directory implements Serializable {
      *
      * @param orderManager the OrderManager to pass to OrderImporter when importing files
      */
-    public Directory(OrderManager orderManager) {
+    public Directory(OrderManager orderManager, String watchFolder) {
+        this.watchFolder = watchFolder;
         this.orderManager = orderManager;
 
         try (ObjectInputStream temp = new ObjectInputStream( new FileInputStream("importedFiles.dat"))) {
