@@ -547,11 +547,20 @@ public class MainGUI extends Application {
      */
     private void handleUndo(){
         boolean success = undoManager.undo(orderManager);
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Undo");
+
         if(success){
+            alert.setHeaderText("Undo successful.");
+            alert.setContentText("The last action has been successfully undone.");
             log("Undo Successful.", Color.GREEN);
         }else{
+            alert.setHeaderText("Nothing to undo.");
+            alert.setContentText("There are no actions to undo.");
             log("Nothing to undo.", Color.RED);
         }
+
+        alert.showAndWait();
         refreshOrderList();
     }
 
