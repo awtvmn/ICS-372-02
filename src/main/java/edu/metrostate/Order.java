@@ -17,6 +17,9 @@ public abstract class Order implements Serializable {
     protected String type;
     @Serial
     private static final long serialVersionUID = 1L;
+    private long startedAt = 0;
+    private long completedAt = 0;
+    private long canceledAt = 0;
 
     /**
      * Constructs a new Order.
@@ -81,13 +84,27 @@ public abstract class Order implements Serializable {
         return items;
     }
 
+    /** Returns timestamp of started orders.
+     * @return timestamp of started orders */
+    public long getStartedAt() { return startedAt; }
+
+    /** Returns timestamp of completed orders.
+     * @return timestamp of completed orders */
+    public long getCompletedAt() { return completedAt; }
+
+    /** Returns timestamp of canceled orders.
+     * @return timestamp of canceled orders */
+    public long getCanceledAt() { return canceledAt; }
+
     /**
      * startFulfilling method, returns true if incoming orders need to be started
      * @return boolean */
     public boolean startFulfilling() {
         if (status == OrderStatus.INCOMING){
             status = OrderStatus.IN_PROGRESS;
+            startedAt = System.currentTimeMillis();
             return true;
+
         }
         return false;
     }
@@ -97,11 +114,9 @@ public abstract class Order implements Serializable {
      * @return boolean
      */
     public boolean cancelOrder() {
-        if (status == OrderStatus.INCOMING){
+        if (status == OrderStatus.INCOMING || status == OrderStatus.IN_PROGRESS){
             status = OrderStatus.CANCELED;
-            return true;
-        } else if (status == OrderStatus.IN_PROGRESS){
-            status = OrderStatus.CANCELED;
+            canceledAt = System.currentTimeMillis();
             return true;
         }
         return false;
@@ -114,6 +129,7 @@ public abstract class Order implements Serializable {
     public boolean completeOrder() {
         if (status == OrderStatus.IN_PROGRESS) {
             status = OrderStatus.COMPLETED;
+            completedAt = System.currentTimeMillis();
             return true;
         }
         return false;

@@ -133,6 +133,28 @@ public class MainGUI extends Application {
             });
         }
 
+        // When an order is selected in one column, clear selection in the other two
+        shipListView.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal != null) {
+                pickupListView.getSelectionModel().clearSelection();
+                deliveryListView.getSelectionModel().clearSelection();
+            }
+        });
+
+        pickupListView.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal != null) {
+                shipListView.getSelectionModel().clearSelection();
+                deliveryListView.getSelectionModel().clearSelection();
+            }
+        });
+
+        deliveryListView.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal != null) {
+                shipListView.getSelectionModel().clearSelection();
+                pickupListView.getSelectionModel().clearSelection();
+            }
+        });
+
 
         // Each column has a colored header and shows only its order type
         VBox shipCol     = makeOrderColumn("🛫  Ship",     shipListView,     "#dbeeff", "#1a5fa8");
@@ -183,8 +205,8 @@ public class MainGUI extends Application {
 
         // Right panel = buttons on top, detail panel below
         VBox rightPanel = new VBox(10, buttonPanel, detailHeader, detailPanel);
-        rightPanel.setPrefWidth(220);
-        rightPanel.setMinWidth(220);
+        rightPanel.setPrefWidth(260);
+        rightPanel.setMinWidth(260);
         rightPanel.setPadding(new Insets(0, 0, 0, 10));
 
         // bottom - output messages
@@ -227,9 +249,9 @@ public class MainGUI extends Application {
 
         // show the window
         primaryStage.setTitle("Warehouse Order System");
-        primaryStage.setScene(new Scene(root, 1000, 800));
+        primaryStage.setScene(new Scene(root, 1100, 800));
         primaryStage.show();
-        primaryStage.setMinWidth(1000);
+        primaryStage.setMinWidth(1100);
         primaryStage.setMinHeight(800);
 
         refreshOrderList();
@@ -304,7 +326,9 @@ public class MainGUI extends Application {
         } else if (statusBefore == OrderStatus.COMPLETED) {
             log("Order #" + orderID + " is already completed.", Color.RED);
         } else {
-            log("Started order #" + orderID, Color.BLUE);
+            String startTime = new java.text.SimpleDateFormat("MM/dd/yyyy HH:mm:ss")
+                    .format(new java.util.Date(orderManager.getAllOrders().get(orderID).getStartedAt()));
+            log("Started order #" + orderID + " at " + startTime, Color.BLUE);
         }
 
         refreshOrderList();
@@ -327,7 +351,9 @@ public class MainGUI extends Application {
         } else if (statusBefore == OrderStatus.INCOMING) {
             log("Order #" + orderID + " cannot be completed. Must be started first.", Color.RED);
         } else {
-            log("Completed order #" + orderID, Color.GREEN);
+            String completeTime = new java.text.SimpleDateFormat("MM/dd/yyyy HH:mm:ss")
+                    .format(new java.util.Date(orderManager.getAllOrders().get(orderID).getCompletedAt()));
+            log("Completed order #" + orderID + " at " + completeTime, Color.GREEN);
         }
 
         refreshOrderList();
@@ -368,6 +394,18 @@ public class MainGUI extends Application {
 
         detailPanel.getChildren().add(header);
         detailPanel.getChildren().add(makeDetailRow("Status", order.getOrderStatus().toString()));
+
+        if (order.getStartedAt() != 0) {
+            String started = new java.text.SimpleDateFormat("MM/dd/yyyy HH:mm:ss")
+                    .format(new java.util.Date(order.getStartedAt()));
+            detailPanel.getChildren().add(makeDetailRow("Started", started));
+        }
+        if (order.getCompletedAt() != 0) {
+            String completed = new java.text.SimpleDateFormat("MM/dd/yyyy HH:mm:ss")
+                    .format(new java.util.Date(order.getCompletedAt()));
+            detailPanel.getChildren().add(makeDetailRow("Completed", completed));
+        }
+
         if (order.getOrderDate() != 0)
             detailPanel.getChildren().add(makeDetailRow("Date", String.valueOf(order.getOrderDate())));
         if (order.getSourceFile() != null)
@@ -395,10 +433,12 @@ public class MainGUI extends Application {
     private HBox makeDetailRow(String label, String value) {
         Label l = new Label(label + ":");
         l.setStyle("-fx-text-fill: gray; -fx-font-size: 12px;");
-        l.setPrefWidth(60);
+        l.setPrefWidth(80);
         Label v = new Label(value);
         v.setStyle("-fx-font-weight: bold; -fx-font-size: 12px;");
         v.setWrapText(true);
+        v.setMaxWidth(Double.MAX_VALUE);
+        HBox.setHgrow(v, Priority.ALWAYS);
         return new HBox(8, l, v);
     }
 
@@ -428,9 +468,13 @@ public class MainGUI extends Application {
             if (reason.isPresent() && !reason.get().trim().isEmpty()) {
                 orderManager.cancelOrder(orderID);
                 if (statusBefore == OrderStatus.IN_PROGRESS) {
-                    log("Order # " + orderID + " has stopped being fulfilled and been canceled. Reason: " + reason.get());
+                    String cancelTime = new java.text.SimpleDateFormat("MM/dd/yyyy HH:mm:ss")
+                            .format(new java.util.Date(orderManager.getAllOrders().get(orderID).getCanceledAt()));
+                    log("Order #" + orderID + " has stopped being fulfilled and been canceled at " + cancelTime + ". Reason: " + reason.get());
                 } else {
-                    log("Order # " + orderID + " is canceled. Reason: " + reason.get());
+                    String cancelTime = new java.text.SimpleDateFormat("MM/dd/yyyy HH:mm:ss")
+                            .format(new java.util.Date(orderManager.getAllOrders().get(orderID).getCanceledAt()));
+                    log("Order #" + orderID + " is canceled at " + cancelTime + ". Reason: " + reason.get());
                 }
             } else {
                 log("No reason entered. Order has not been canceled");

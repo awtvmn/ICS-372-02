@@ -17,7 +17,7 @@ import com.google.gson.GsonBuilder;
 public class OrderManager implements Serializable {
 
     private HashMap<Integer, Order> allOrders = new HashMap<>();
-    private static int nextOrderID = 1;
+    private int nextOrderID = 1;
     @Serial
     private static final long serialVersionUID = 1L;
 
@@ -127,7 +127,6 @@ public class OrderManager implements Serializable {
 
     /**
      * Cancels an order if it is INCOMING or IN_PROGRESS.
-     * Feature 1
      *
      * @param orderID the ID of the order to cancel
      */
@@ -243,7 +242,6 @@ public class OrderManager implements Serializable {
 
     /**
      * Loads previously saved orders from disk when the program starts.
-     * Feature 2
      */
     public void loadOrders() {
         File file = new File("allOrders.dat");
@@ -260,7 +258,6 @@ public class OrderManager implements Serializable {
 
     /**
      * Saves all current orders to disk when the program stops.
-     * Feature 2
      */
     public void saveOrder() {
         try {

@@ -48,7 +48,7 @@ public class Directory implements Serializable {
         File folder = new File(watchFolder);
         if(!folder.exists()) {
             folder.mkdir();
-            System.out.println("Created watched/ folder at: " + folder.getAbsolutePath());
+            System.out.println("Created" + watchFolder + "/ folder at: " + folder.getAbsolutePath());
         }
         System.out.println("Watching folder:" + folder.getAbsolutePath());
     }
