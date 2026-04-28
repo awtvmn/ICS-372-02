@@ -1,14 +1,9 @@
 package edu.metrostate;
 
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-
 import java.io.*;
 import java.util.HashMap;
 import java.util.ArrayList;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 
 /**
  * OrderManager class, used to add, start, cancel, complete or incomplete orders
@@ -151,93 +146,6 @@ public class OrderManager implements Serializable {
      */
     public HashMap<Integer, Order> getAllOrders() {
         return allOrders;
-    }
-
-    /**
-     * Exports all orders to a JSON file called "exported json files"
-     */
-    public void exportJSON() {
-        File folder = new File("exported json files");
-        if (!folder.exists()) folder.mkdir();
-
-        JSONObject root = new JSONObject();
-        JSONArray ordersArray = new JSONArray();
-        for (Order order : allOrders.values()){
-            JSONObject orderJson = new JSONObject();
-            orderJson.put("order_id",order.getOrderID());
-            orderJson.put("type",order.getType());
-            orderJson.put("order_date",order.getOrderDate());
-            orderJson.put("status",order.getOrderStatus());
-            if (!order.getOrderStatus().toString().equals("COMPLETED")){
-                orderJson.put("price total ",order.getTotalPrice());
-            }
-
-            JSONArray itemsArray = new JSONArray();
-            for (Item item : order.getItems()){
-                JSONObject itemJson = new JSONObject();
-                itemJson.put("name",item.getName());
-                itemJson.put("Quantity",item.getQuantity());
-                itemJson.put("price",item.getPrice());
-                itemsArray.add(itemJson);
-            }
-            orderJson.put("items", itemsArray);
-            ordersArray.add(orderJson);
-        }
-        root.put("orders", ordersArray);
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        String prettyJson = gson.toJson(root);
-
-        try (FileWriter writer = new FileWriter("exported json files/all-orders.json")) {
-            writer.write(prettyJson);
-            System.out.println("All orders exported successfully.");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * Exports all orders to a XML file called "exported xml files"
-     */
-    public void exportXML() {
-        File folder = new File("exported xml files");
-        if (!folder.exists()) folder.mkdir();
-
-        StringBuilder xml = new StringBuilder();
-        xml.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-        xml.append("<Orders>\n");
-
-        for (Order order : allOrders.values()) {
-            xml.append("    <Order id=\"").append(order.getOrderID()).append("\">\n");
-            xml.append("        <OrderType>").append(order.getType()).append("</OrderType>\n");
-            xml.append("        <Status>").append(order.getOrderStatus()).append("</Status>\n");
-
-            if (order.getOrderStatus() != OrderStatus.COMPLETED) {
-                xml.append("        <PriceTotal>").append(order.getTotalPrice()).append("</PriceTotal>\n");
-            }
-
-            if (order.getSourceFile() != null) {
-                xml.append("        <SourceFile>").append(order.getSourceFile()).append("</SourceFile>\n");
-            }
-
-            for (Item item : order.getItems()) {
-                xml.append("        <Item type=\"").append(item.getName()).append("\">\n");
-                xml.append("            <Price>").append(item.getPrice()).append("</Price>\n");
-                xml.append("            <Quantity>").append(item.getQuantity()).append("</Quantity>\n");
-                xml.append("        </Item>\n");
-            }
-
-            xml.append("    </Order>\n");
-        }
-
-        xml.append("</Orders>");
-
-        try (FileWriter writer = new FileWriter("exported xml files/all-orders.xml")) {
-            writer.write(xml.toString());
-            System.out.println("All orders exported successfully.");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
     }
 
     /**

@@ -532,8 +532,8 @@ public class MainGUI extends Application {
      * Exports all orders to a JSON and XML file
      */
     private void handleExport() {
-        orderManager.exportXML();
-        orderManager.exportJSON();
+        OrderExporter.exportXML(orderManager.getAllOrders());
+        OrderExporter.exportJSON(orderManager.getAllOrders());
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Export Successful");
         alert.setHeaderText("Orders exported successfully.");

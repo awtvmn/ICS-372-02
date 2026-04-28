@@ -10,7 +10,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Unit tests for the OrderManager class.
- * Covers adding, starting, completing, canceling, exporting, and persisting orders.
+ * Covers adding, starting, completing, canceling, and persisting orders.
+ * Export functionality is also tested here via OrderExporter.
  */
 public class OrderManagerTest {
 
@@ -26,12 +27,6 @@ public class OrderManagerTest {
     @AfterEach
     void tearDown() {
         new File("allOrders.dat").delete();
-        File jsonFolder = new File("exported json files");
-        if (jsonFolder.exists() && jsonFolder.listFiles() != null)
-            for (File f : jsonFolder.listFiles()) f.delete();
-        File xmlFolder = new File("exported xml files");
-        if (xmlFolder.exists() && xmlFolder.listFiles() != null)
-            for (File f : xmlFolder.listFiles()) f.delete();
     }
 
     private ArrayList<Item> createSampleItems() {
@@ -111,27 +106,6 @@ public class OrderManagerTest {
         assertEquals(OrderStatus.COMPLETED, orderManager.getAllOrders().get(id2).getOrderStatus());
     }
 
-    @Test
-    void exportJSONCreatesJsonFile() throws IOException {
-        ArrayList<Item> items = createSampleItems();
-        orderManager.addOrder("ship", 0, items);
-        orderManager.exportJSON();
-
-        File jsonFile = new File("exported json files/all-orders.json");
-        assertTrue(jsonFile.exists());
-        assertTrue(jsonFile.length() > 0);
-    }
-
-    @Test
-    void exportXMLCreatesXmlFile() throws IOException {
-        ArrayList<Item> items = createSampleItems();
-        orderManager.addOrder("pickup", 0, items);
-        orderManager.exportXML();
-
-        File xmlFile = new File("exported xml files/all-orders.xml");
-        assertTrue(xmlFile.exists());
-        assertTrue(xmlFile.length() > 0);
-    }
 
     @Test
     void saveAndLoadOrdersPersistData() {
