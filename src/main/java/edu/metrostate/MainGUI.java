@@ -8,6 +8,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.Label;
 import javafx.scene.layout.*;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.animation.Timeline;
 import javafx.animation.KeyFrame;
@@ -176,10 +177,11 @@ public class MainGUI extends Application {
         Button btnCancel     = new Button("Cancel Order");
         Button btnExport     = new Button("Export All Orders");
         Button btnUndo       = new Button("Undo Last Action");
+        Button btnSearch     = new Button("Search");
 
         // make all buttons same width
         for (Button b : new Button[]{btnStart, btnComplete,
-                btnDisplay, btnCancel, btnUndo, btnUncompleted, btnExport}) {
+                btnDisplay, btnCancel, btnUndo, btnUncompleted, btnExport, btnSearch}) {
             b.setMaxWidth(Double.MAX_VALUE);
         }
 
@@ -190,6 +192,7 @@ public class MainGUI extends Application {
                 btnDisplay,
                 btnCancel,
                 btnUndo,
+                btnSearch,
                 new Separator(),
                 btnUncompleted,
                 btnExport,
@@ -230,6 +233,7 @@ public class MainGUI extends Application {
         btnUndo.setOnAction(e -> handleUndo());
         btnUncompleted.setOnAction(e -> handleToggleUncompleted());
         btnExport.setOnAction(e -> handleExport());
+        btnSearch.setOnAction(e -> handleSearch());
 
         // Info banner on top - tells users how to get started
         Label infoBanner = new Label(
@@ -261,6 +265,183 @@ public class MainGUI extends Application {
         primaryStage.setMinHeight(800);
 
         refreshOrderList();
+    }
+
+    /**
+     * Search button - lets the user search for a specific order ID or a specific item in an order
+     * this is the popup message that gets the users iput
+     */
+    private void handleSearch() {
+        Stage popup = new Stage();
+        popup.initModality(Modality.APPLICATION_MODAL);
+        popup.setTitle("Search Orders");
+
+        VBox layout = new VBox(10);
+        layout.setPadding(new Insets(20));
+
+        Label label = new Label("Search by Order ID or with an item name: ");
+        TextField searchField = new TextField();
+        searchField.setPromptText("Enter id or item name");
+
+        Button searchButton = new Button("Search");
+        layout.getChildren().addAll(label, searchField, searchButton);
+        Scene scene = new Scene(layout, 300, 150);
+        popup.setScene(scene);
+
+        searchButton.setOnAction(e -> {
+            String query = searchField.getText();
+            popup.close();
+            highlightMatchingOrders(query);
+        });
+
+        popup.showAndWait();
+
+    }
+
+    /**
+     * highlightMatchingOrders - part of the search method, it logs weather or not it found the searched item
+     * it has a count, that calls the countMatch method in order to be able to log
+     * if a search was successful or not
+     * @param query
+     */
+    private void highlightMatchingOrders(String query) {
+        if (query == null || query.isBlank()) {
+            clearHighlights();
+            return;
+        }
+
+        String lower = query.toLowerCase();
+
+        //counter to make the log easier and cleaner
+        int count = 0;
+        count += countMatch(shipListView, lower);
+        count += countMatch(pickupListView, lower);
+        count += countMatch(deliveryListView, lower);
+
+        //checks if the user input is just numbers
+        boolean isNum = query.chars().allMatch(Character::isDigit);
+
+
+        if (count == 0 && isNum){
+            log("No order with ID " + query + " has been found.");
+        } else if (count == 0){
+            log("No order(s) found with item '" + query + "'.");
+        } else if (isNum) {
+            log("Order ID " + query + " has been highlighted.");
+        } else {
+            log("Orders containing '" + query + "' have been highlighted.");
+        }
+
+        //calls the actual method to highlight the searched info
+        highlightOrder(shipListView, lower);
+        highlightOrder(pickupListView, lower);
+        highlightOrder(deliveryListView, lower);
+
+
+    }
+
+    /**
+     * countMatch - part of highlightMatchingOrders method, used as a counter in order to properly
+     * log the above method
+     * @param listView
+     * @param query
+     * @return
+     */
+    private int countMatch(ListView<Order> listView, String query) {
+        int count = 0;
+
+        for(Order order : listView.getItems()) {
+            boolean matchesID = String.valueOf(order.getOrderID()).toLowerCase().contains(query);
+
+            boolean matchesItem = order.getItems().stream().anyMatch(item -> item.getName().toLowerCase().contains(query));
+
+            if (matchesID || matchesItem) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    /**
+     * clearHighlights - part of the search function, clears highlights when a new search is made
+     * or nothing is entered, used to make it easier on the user
+     * it also makes sure to keep color/icons of the orders
+     */
+    private void clearHighlights() {
+        for(ListView<Order> lv : List.of(shipListView, deliveryListView, pickupListView)) {
+            lv.setCellFactory(listView -> new ListCell<>() {
+                @Override
+                protected void updateItem(Order order, boolean empty) {
+                    super.updateItem(order, empty);
+
+                    if (order == null || empty) {
+                        setText(null);
+                        setStyle("");
+                        return;
+                    }
+
+                    String icon;
+                    if (order.getOrderStatus() == OrderStatus.COMPLETED) icon = "✅";
+                    else if (order.getOrderStatus() == OrderStatus.CANCELED) icon = "❌";
+                    else if (order.getOrderStatus() == OrderStatus.IN_PROGRESS) icon = "⏳";
+                    else icon = "📦";
+
+                    setText(icon + "Order #" +order.getOrderID() + " | " + order.getOrderStatus());
+
+                    String color;
+                    if(order.getOrderStatus() == OrderStatus.CANCELED) color = "gray";
+                    else if (order.getOrderStatus() == OrderStatus.COMPLETED) color = "green";
+                    else if (order.getOrderStatus() == OrderStatus.IN_PROGRESS) color = "blue";
+                    else color = "black";
+                    setStyle("-fx-text-fill: " + color + "; -fx-font-weight: bold;");
+                }
+            });
+        }
+    }
+
+    /**
+     * highlightOrder - part of the search function, actual highlighting of orders
+     * if a match is found, it highlights them as well as keeps the color and icons
+     * @param listView
+     * @param query
+     */
+    private void highlightOrder(ListView<Order> listView, String query) {
+        listView.setCellFactory(lv -> new ListCell<>() {
+            @Override
+            protected void updateItem(Order order, boolean empty) {
+                super.updateItem(order, empty);
+
+                if (order == null || empty) {
+                    setText(null);
+                    setStyle("");
+                    return;
+                }
+
+                String icon;
+                if (order.getOrderStatus() == OrderStatus.COMPLETED) icon = "✅";
+                else if (order.getOrderStatus() == OrderStatus.CANCELED) icon = "❌";
+                else if (order.getOrderStatus() == OrderStatus.IN_PROGRESS) icon = "⏳";
+                else icon = "📦";
+
+                setText(icon + "Order #" +order.getOrderID() + " | " + order.getOrderStatus());
+
+                String color;
+                if(order.getOrderStatus() == OrderStatus.CANCELED) color = "gray";
+                else if (order.getOrderStatus() == OrderStatus.COMPLETED) color = "green";
+                else if (order.getOrderStatus() == OrderStatus.IN_PROGRESS) color = "blue";
+                else color = "black";
+                setStyle("-fx-text-fill: " + color + "; -fx-font-weight: bold;");
+
+                boolean matchesID = String.valueOf(order.getOrderID()).toLowerCase().contains(query);
+
+                boolean matchesItem = order.getItems().stream().anyMatch(item -> item.getName().toLowerCase().contains(query));
+
+                //if either matches, it will highlight according to the query provided
+                if (matchesID || matchesItem) {
+                    setStyle("-fx-background-color: yellow; -fx-text-fill: " + color + "; -fx-font-weight: bold");
+                }
+            }
+        });
     }
 
     /**
