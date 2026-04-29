@@ -1,4 +1,5 @@
-import edu.metrostate.*;
+package edu.metrostate;
+
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.util.ArrayList;

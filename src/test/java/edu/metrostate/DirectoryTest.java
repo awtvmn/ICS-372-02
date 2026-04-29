@@ -172,7 +172,7 @@ public class DirectoryTest {
             """;
         writeXML("test_sourcefile.xml", xml);
         directory.checkFolder();
-        Order order = orderManager.getAllOrders().get(600);
+        edu.metrostate.Order order = orderManager.getAllOrders().get(600);
         assertNotNull(order);
         assertEquals("test_sourcefile.xml", order.getSourceFile());
     }
@@ -191,7 +191,7 @@ public class DirectoryTest {
             """;
         writeXML("test_items.xml", xml);
         directory.checkFolder();
-        Order order = orderManager.getAllOrders().get(700);
+        edu.metrostate.Order order = orderManager.getAllOrders().get(700);
         assertNotNull(order);
         assertEquals(2, order.getItems().size());
         assertEquals("Soap", order.getItems().get(0).getName());
@@ -236,6 +236,6 @@ public class DirectoryTest {
         directory.checkFolder();
         Order order = orderManager.getAllOrders().get(900);
         assertNotNull(order);
-        assertEquals(OrderStatus.INCOMING, order.getOrderStatus());
+        Assertions.assertEquals(OrderStatus.INCOMING, order.getOrderStatus());
     }
 }

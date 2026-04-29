@@ -60,6 +60,9 @@ public class MainGUI extends Application {
     //undo feature
     private UndoManager undoManager = new UndoManager();
 
+    //search feature
+    private OrderSearch orderSearch = new OrderSearch();
+
     /**
      * init - if program has loaded before, loads progress from before
      * feature 2
@@ -269,7 +272,7 @@ public class MainGUI extends Application {
 
     /**
      * Search button - lets the user search for a specific order ID or a specific item in an order
-     * this is the popup message that gets the users iput
+     * this is the popup message that gets the users input
      */
     private void handleSearch() {
         Stage popup = new Stage();
@@ -302,7 +305,7 @@ public class MainGUI extends Application {
      * highlightMatchingOrders - part of the search method, it logs weather or not it found the searched item
      * it has a count, that calls the countMatch method in order to be able to log
      * if a search was successful or not
-     * @param query
+     * @param query String
      */
     private void highlightMatchingOrders(String query) {
         if (query == null || query.isBlank()) {
@@ -314,9 +317,9 @@ public class MainGUI extends Application {
 
         //counter to make the log easier and cleaner
         int count = 0;
-        count += countMatch(shipListView, lower);
-        count += countMatch(pickupListView, lower);
-        count += countMatch(deliveryListView, lower);
+        count += orderSearch.countMatch(shipListView.getItems(), query);
+        count += orderSearch.countMatch(pickupListView.getItems(), query);
+        count += orderSearch.countMatch(deliveryListView.getItems(), query);
 
         //checks if the user input is just numbers
         boolean isNum = query.chars().allMatch(Character::isDigit);
@@ -338,28 +341,6 @@ public class MainGUI extends Application {
         highlightOrder(deliveryListView, lower);
 
 
-    }
-
-    /**
-     * countMatch - part of highlightMatchingOrders method, used as a counter in order to properly
-     * log the above method
-     * @param listView
-     * @param query
-     * @return
-     */
-    private int countMatch(ListView<Order> listView, String query) {
-        int count = 0;
-
-        for(Order order : listView.getItems()) {
-            boolean matchesID = String.valueOf(order.getOrderID()).toLowerCase().contains(query);
-
-            boolean matchesItem = order.getItems().stream().anyMatch(item -> item.getName().toLowerCase().contains(query));
-
-            if (matchesID || matchesItem) {
-                count++;
-            }
-        }
-        return count;
     }
 
     /**
@@ -396,17 +377,29 @@ public class MainGUI extends Application {
                     setStyle("-fx-text-fill: " + color + "; -fx-font-weight: bold;");
                 }
             });
+
+            lv.refresh();
         }
     }
 
     /**
      * highlightOrder - part of the search function, actual highlighting of orders
      * if a match is found, it highlights them as well as keeps the color and icons
-     * @param listView
-     * @param query
+     * @param listView ListView<Order>
+     * @param query String
      */
     private void highlightOrder(ListView<Order> listView, String query) {
+
+        List<Order> match = orderSearch.findMatch(listView.getItems(), query);
+
         listView.setCellFactory(lv -> new ListCell<>() {
+            //turns selected items back to the blue
+            {
+                setOnMouseClicked( e -> {
+                    clearHighlights();
+                    listView.refresh();
+                });
+            }
             @Override
             protected void updateItem(Order order, boolean empty) {
                 super.updateItem(order, empty);
@@ -432,12 +425,7 @@ public class MainGUI extends Application {
                 else color = "black";
                 setStyle("-fx-text-fill: " + color + "; -fx-font-weight: bold;");
 
-                boolean matchesID = String.valueOf(order.getOrderID()).toLowerCase().contains(query);
-
-                boolean matchesItem = order.getItems().stream().anyMatch(item -> item.getName().toLowerCase().contains(query));
-
-                //if either matches, it will highlight according to the query provided
-                if (matchesID || matchesItem) {
+                if(match.contains(order)){
                     setStyle("-fx-background-color: yellow; -fx-text-fill: " + color + "; -fx-font-weight: bold");
                 }
             }

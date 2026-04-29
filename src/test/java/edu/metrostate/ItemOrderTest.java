@@ -1,8 +1,6 @@
-import edu.metrostate.DeliveryOrder;
-import edu.metrostate.Item;
-import edu.metrostate.PickupOrder;
-import edu.metrostate.ShipOrder;
-import org.junit.jupiter.api.Test;
+package edu.metrostate;
+
+import org.junit.jupiter.api.*;
 
 import java.util.ArrayList;
 
